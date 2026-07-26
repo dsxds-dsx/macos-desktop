@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>macOS</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 170 170'%3E%3Cpath d='M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.2-2.12-9.98-3.17-14.35-3.17-4.58 0-9.5 1.05-14.76 3.17-5.27 2.13-9.51 3.24-12.75 3.35-4.93.21-9.84-1.96-14.75-6.52-3.12-2.73-7.04-7.41-11.73-14.04-5.03-7.08-9.17-15.29-12.41-24.65C13.1 110.9 11.5 101.41 11.5 92.3c0-10.05 2.18-18.88 6.55-26.46 3.48-6.09 8.13-10.87 13.95-14.36 5.82-3.48 12.12-5.27 18.9-5.39 3.91 0 9.04 1.21 15.38 3.59 6.34 2.39 10.41 3.6 12.21 3.6 1.34 0 5.87-1.42 13.56-4.24 7.29-2.62 13.44-3.71 18.5-3.28 13.76 1.11 24.08 6.56 30.93 16.38-12.3 7.46-18.38 17.9-18.22 31.31.14 10.45 3.91 19.15 11.29 26.06 3.34 3.18 7.07 5.63 11.22 7.37-.9 2.61-1.85 5.11-2.85 7.51-.28.66-.56 1.3-.85 1.93zM119.09 7.24c0 8.2-2.99 15.83-8.94 22.84-7.17 8.32-15.85 13.14-25.33 12.38a25.22 25.22 0 0 1-.19-3.07c0-7.88 3.43-16.28 9.4-22.61 2.98-3.2 6.69-5.83 11.14-7.9 4.43-2.04 8.55-3.15 12.32-3.33.16 1.13.24 2.27.24 3.41z' fill='%23333'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="css/lib/leaflet.css">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/windows.css">
+    <link rel="stylesheet" href="css/apps.css?v=4">
+</head>
+<body data-theme="dark">
+    <div id="boot-screen" class="boot-screen">
+        <div class="boot-logo">
+            <svg viewBox="0 0 170 170" width="120" height="120">
+                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.2-2.12-9.98-3.17-14.35-3.17-4.58 0-9.5 1.05-14.76 3.17-5.27 2.13-9.51 3.24-12.75 3.35-4.93.21-9.84-1.96-14.75-6.52-3.12-2.73-7.04-7.41-11.73-14.04-5.03-7.08-9.17-15.29-12.41-24.65C13.1 110.9 11.5 101.41 11.5 92.3c0-10.05 2.18-18.88 6.55-26.46 3.48-6.09 8.13-10.87 13.95-14.36 5.82-3.48 12.12-5.27 18.9-5.39 3.91 0 9.04 1.21 15.38 3.59 6.34 2.39 10.41 3.6 12.21 3.6 1.34 0 5.87-1.42 13.56-4.24 7.29-2.62 13.44-3.71 18.5-3.28 13.76 1.11 24.08 6.56 30.93 16.38-12.3 7.46-18.38 17.9-18.22 31.31.14 10.45 3.91 19.15 11.29 26.06 3.34 3.18 7.07 5.63 11.22 7.37-.9 2.61-1.85 5.11-2.85 7.51-.28.66-.56 1.3-.85 1.93zM119.09 7.24c0 8.2-2.99 15.83-8.94 22.84-7.17 8.32-15.85 13.14-25.33 12.38a25.22 25.22 0 0 1-.19-3.07c0-7.88 3.43-16.28 9.4-22.61 2.98-3.2 6.69-5.83 11.14-7.9 4.43-2.04 8.55-3.15 12.32-3.33.16 1.13.24 2.27.24 3.41z" fill="currentColor" transform="translate(0, -5)"/>
+            </svg>
+        </div>
+        <div class="boot-progress">
+            <div class="boot-progress-bar"></div>
+        </div>
+    </div>
+
+    <div id="lock-screen" class="lock-screen hidden">
+        <div class="lock-wallpaper"></div>
+        <div class="lock-content">
+            <div class="lock-time" id="lock-time">00:00</div>
+            <div class="lock-date" id="lock-date">1月1日 星期一</div>
+            <div class="lock-user">
+                <div class="lock-avatar">
+                    <svg viewBox="0 0 100 100" width="120" height="120">
+                        <circle cx="50" cy="50" r="50" fill="#636366"/>
+                        <circle cx="50" cy="38" r="18" fill="#e8e8ed"/>
+                        <ellipse cx="50" cy="85" rx="30" ry="25" fill="#e8e8ed"/>
+                    </svg>
+                </div>
+                <div class="lock-username">用户</div>
+            </div>
+            <div class="lock-password-area">
+                <input type="password" id="lock-password" class="lock-password" placeholder="输入密码（任意密码解锁）" autocomplete="off">
+                <button class="lock-submit" id="lock-submit">→</button>
+            </div>
+            <div class="lock-hint" id="lock-hint"></div>
+        </div>
+        <div class="lock-bottom">
+            <div class="lock-controls">
+                <button class="lock-control-btn" id="sleep-btn" title="睡眠">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z" fill="currentColor"/></svg>
+                </button>
+                <button class="lock-control-btn" id="restart-btn" title="重新启动">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="currentColor"/></svg>
+                </button>
+                <button class="lock-control-btn" id="shutdown-btn" title="关机">
+                    <svg viewBox="0 0 24 24" width="20" height="20"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0 1 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.18.99-4.12 2.59-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" fill="currentColor"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="desktop" class="desktop hidden">
+        <div class="wallpaper" id="wallpaper"></div>
+        <div class="desktop-icons" id="desktop-icons"></div>
+
+        <div class="menubar" id="menubar">
+            <div class="menubar-left">
+                <div class="menubar-item apple-menu" id="apple-menu">
+                    <svg viewBox="0 0 170 170" width="16" height="16" style="margin-top:2px">
+                        <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.2-2.12-9.98-3.17-14.35-3.17-4.58 0-9.5 1.05-14.76 3.17-5.27 2.13-9.51 3.24-12.75 3.35-4.93.21-9.84-1.96-14.75-6.52-3.12-2.73-7.04-7.41-11.73-14.04-5.03-7.08-9.17-15.29-12.41-24.65C13.1 110.9 11.5 101.41 11.5 92.3c0-10.05 2.18-18.88 6.55-26.46 3.48-6.09 8.13-10.87 13.95-14.36 5.82-3.48 12.12-5.27 18.9-5.39 3.91 0 9.04 1.21 15.38 3.59 6.34 2.39 10.41 3.6 12.21 3.6 1.34 0 5.87-1.42 13.56-4.24 7.29-2.62 13.44-3.71 18.5-3.28 13.76 1.11 24.08 6.56 30.93 16.38-12.3 7.46-18.38 17.9-18.22 31.31.14 10.45 3.91 19.15 11.29 26.06 3.34 3.18 7.07 5.63 11.22 7.37-.9 2.61-1.85 5.11-2.85 7.51-.28.66-.56 1.3-.85 1.93z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="menubar-item app-menu" id="app-menu">访达</div>
+                <div class="menubar-item" data-menu="file">文件</div>
+                <div class="menubar-item" data-menu="edit">编辑</div>
+                <div class="menubar-item" data-menu="view">显示</div>
+                <div class="menubar-item" data-menu="go">前往</div>
+                <div class="menubar-item" data-menu="window">窗口</div>
+                <div class="menubar-item" data-menu="help">帮助</div>
+            </div>
+            <div class="menubar-right">
+                <div class="menubar-item" id="battery-menu" title="85%">
+                    <svg viewBox="0 0 28 24" width="28" height="14">
+                        <rect x="1" y="4" width="22" height="16" rx="3" ry="3" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                        <rect x="24" y="9" width="2" height="6" rx="1" fill="currentColor" opacity="0.5"/>
+                        <rect x="3" y="6" width="17" height="12" rx="1.5" fill="currentColor"/>
+                    </svg>
+                    <span style="font-size:11px;opacity:0.8;margin-left:1px;">85%</span>
+                </div>
+                <div class="menubar-item" id="wifi-menu" title="Wi-Fi 已开启">
+                    <svg viewBox="0 0 20 16" width="18" height="14">
+                        <path d="M10 3C6.5 3 3.3 4.3 0.8 6.5L2.2 8C4.3 6.2 7 5 10 5C13 5 15.7 6.2 17.8 8L19.2 6.5C16.7 4.3 13.5 3 10 3Z" fill="currentColor"/>
+                        <path d="M10 6.5C7.5 6.5 5.2 7.4 3.5 9L4.9 10.5C6.3 9.3 8 8.5 10 8.5C12 8.5 13.7 9.3 15.1 10.5L16.5 9C14.8 7.4 12.5 6.5 10 6.5Z" fill="currentColor"/>
+                        <path d="M10 10C8.5 10 7.1 10.6 6.1 11.5L7.5 13C8.2 12.4 9 12 10 12C11 12 11.8 12.4 12.5 13L13.9 11.5C12.9 10.6 11.5 10 10 10Z" fill="currentColor"/>
+                        <circle cx="10" cy="14" r="1.3" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="menubar-item" id="search-menu">
+                    <svg viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="menubar-item" id="control-center-btn">
+                    <svg viewBox="0 0 24 24" width="18" height="18">
+                        <rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.9"/>
+                        <rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>
+                        <rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>
+                        <rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor" opacity="0.9"/>
+                    </svg>
+                </div>
+                <div class="menubar-item" id="notif-center-btn">
+                    <div class="notif-date" id="menubar-date"></div>
+                    <div class="notif-time" id="menubar-time"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="dropdown-menu" id="apple-dropdown">
+            <div class="dropdown-item" data-action="about">关于本机</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="system-settings">系统设置...</div>
+            <div class="dropdown-item" data-action="app-store">App Store...</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="recent-items">最近使用的项目</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="force-quit">强制退出...</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="sleep">睡眠</div>
+            <div class="dropdown-item" data-action="restart">重新启动...</div>
+            <div class="dropdown-item" data-action="shutdown">关机...</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="lock-screen">锁定屏幕</div>
+        </div>
+
+        <div class="windows-container" id="windows-container"></div>
+
+        <div class="dock-container" id="dock-container">
+            <div class="dock" id="dock"></div>
+        </div>
+
+        <div class="control-center" id="control-center">
+            <div class="cc-grid">
+                <div class="cc-tile cc-tile-large">
+                    <div class="cc-row">
+                        <button class="cc-btn cc-toggle active" id="cc-wifi">
+                            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M12 4C7.31 4 3.07 5.9 0 8.98L12 21 24 8.98C20.93 5.9 16.69 4 12 4z" fill="currentColor"/></svg>
+                            <span>Wi-Fi</span>
+                        </button>
+                        <button class="cc-btn cc-toggle active" id="cc-bluetooth">
+                            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M17.71 7.71L12 2h-1v7.59L6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 11 14.41V22h1l5.71-5.71-4.3-4.29 4.3-4.29zM13 5.83l1.88 1.88L13 9.59V5.83zm1.88 10.46L13 18.17v-3.76l1.88 1.88z" fill="currentColor"/></svg>
+                            <span>蓝牙</span>
+                        </button>
+                    </div>
+                    <div class="cc-row">
+                        <button class="cc-btn cc-toggle active" id="cc-airdrop">
+                            <svg viewBox="0 0 24 24" width="20" height="20"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="currentColor"/></svg>
+                            <span>隔空投送</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="cc-tile">
+                    <div class="cc-tile-label">显示器</div>
+                    <div class="cc-slider">
+                        <input type="range" id="cc-brightness" min="20" max="100" value="100">
+                    </div>
+                </div>
+                <div class="cc-tile">
+                    <div class="cc-tile-label">声音</div>
+                    <div class="cc-slider">
+                        <input type="range" id="cc-volume" min="0" max="100" value="50">
+                    </div>
+                </div>
+                <div class="cc-tile cc-tile-focus">
+                    <button class="cc-focus-btn" data-focus="dnd">
+                        <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/></svg>
+                        <span>专注</span>
+                    </button>
+                </div>
+                <div class="cc-tile cc-media">
+                    <div class="cc-media-info">
+                        <div class="cc-media-art"></div>
+                        <div class="cc-media-text">
+                            <div class="cc-media-title">未播放</div>
+                            <div class="cc-media-artist">音乐</div>
+                        </div>
+                    </div>
+                    <div class="cc-media-controls">
+                        <button class="cc-media-btn"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" fill="currentColor"/></svg></button>
+                        <button class="cc-media-btn" id="cc-play"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></button>
+                        <button class="cc-media-btn"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" fill="currentColor"/></svg></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-center" id="notification-center">
+            <div class="nc-date" id="nc-date"></div>
+            <div class="nc-widgets">
+                <div class="nc-widget nc-widget-weather">
+                    <div class="nc-widget-title">天气</div>
+                    <div class="nc-weather">
+                        <div class="nc-weather-temp">24°</div>
+                        <div class="nc-weather-cond">晴朗</div>
+                        <div class="nc-weather-city">北京</div>
+                    </div>
+                </div>
+                <div class="nc-widget nc-widget-calendar">
+                    <div class="nc-widget-title">日历</div>
+                    <div class="nc-calendar" id="nc-calendar"></div>
+                </div>
+                <div class="nc-widget nc-widget-battery">
+                    <div class="nc-widget-title">电池</div>
+                    <div class="nc-battery-bar">
+                        <div class="nc-battery-level" style="width: 85%"></div>
+                    </div>
+                    <div class="nc-battery-text">电源：电池 85%</div>
+                </div>
+            </div>
+            <div class="nc-notifications">
+                <div class="nc-notifications-title">通知</div>
+                <div class="nc-notification-item">
+                    <div class="nc-notification-icon"></div>
+                    <div class="nc-notification-content">
+                        <div class="nc-notification-app">信息</div>
+                        <div class="nc-notification-text">欢迎使用 macOS 网页版！</div>
+                        <div class="nc-notification-time">刚刚</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="spotlight" id="spotlight">
+            <div class="spotlight-search">
+                <svg viewBox="0 0 24 24" width="22" height="22" class="spotlight-icon">
+                    <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                </svg>
+                <input type="text" id="spotlight-input" placeholder="Spotlight 搜索" autocomplete="off">
+            </div>
+            <div class="spotlight-results" id="spotlight-results"></div>
+        </div>
+
+        <div class="context-menu" id="context-menu"></div>
+    </div>
+
+    <div id="screensaver" class="screensaver hidden">
+        <div class="screensaver-content" id="screensaver-content"></div>
+    </div>
+
+    <div id="shutdown-screen" class="shutdown-screen hidden">
+        <div class="shutdown-content">
+            <div class="shutdown-spinner"></div>
+            <div class="shutdown-text">正在关机...</div>
+        </div>
+    </div>
+
+    <script src="js/system/FileSystem.js"></script>
+    <script src="js/system/WindowManager.js"></script>
+    <script src="js/system/AppManager.js?v=4"></script>
+    <script src="js/system/IconGenerator.js?v=3"></script>
+    <script src="js/apps/Finder.js"></script>
+    <script src="js/apps/Settings.js"></script>
+    <script src="js/apps/Safari.js?v=25"></script>
+    <script src="js/apps/Terminal.js"></script>
+    <script src="js/apps/Notes.js"></script>
+    <script src="js/apps/TextEdit.js"></script>
+    <script src="js/apps/Calendar.js"></script>
+    <script src="js/apps/AI.js?v=3"></script>
+    <script src="js/apps/Photos.js"></script>
+    <script src="js/apps/Mail.js"></script>
+    <script src="js/apps/Messages.js"></script>
+    <script src="js/apps/FaceTime.js"></script>
+    <script src="js/apps/Music.js"></script>
+    <script src="js/apps/QuickTime.js"></script>
+    <script src="js/apps/Preview.js"></script>
+    <script src="js/apps/ActivityMonitor.js"></script>
+    <script src="js/apps/AppStore.js"></script>
+    <script src="js/apps/Calculator.js"></script>
+    <script src="js/apps/Clock.js"></script>
+    <script src="js/apps/Weather.js"></script>
+    <script src="js/apps/Reminders.js"></script>
+    <script src="js/apps/Stickies.js"></script>
+    <script src="js/apps/Chess.js"></script>
+    <script src="js/apps/Dictionary.js"></script>
+    <script src="js/apps/FontBook.js"></script>
+    <script src="js/apps/ImageCapture.js"></script>
+    <script src="js/apps/KeychainAccess.js"></script>
+    <script src="js/apps/MigrationAssistant.js"></script>
+    <script src="js/apps/SystemInformation.js"></script>
+    <script src="js/apps/VoiceMemos.js"></script>
+    <script src="js/apps/Contacts.js"></script>
+    <script src="js/lib/leaflet.js"></script>
+    <script src="js/apps/Maps.js?v=26"></script>
+    <script src="js/apps/News.js"></script>
+    <script src="js/apps/Stocks.js"></script>
+    <script src="js/apps/Home.js"></script>
+    <script src="js/apps/TV.js"></script>
+    <script src="js/apps/Podcasts.js"></script>
+    <script src="js/apps/Books.js"></script>
+    <script src="js/apps/Numbers.js"></script>
+    <script src="js/apps/Pages.js"></script>
+    <script src="js/apps/Keynote.js"></script>
+    <script src="js/apps/GarageBand.js"></script>
+    <script src="js/apps/iMovie.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

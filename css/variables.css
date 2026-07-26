@@ -1,0 +1,137 @@
+:root {
+    --system-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --mono-font: "SF Mono", "Monaco", "Inconsolata", "Menlo", Consolas, monospace;
+    
+    --dock-height: 72px;
+    --menubar-height: 28px;
+    --window-radius: 12px;
+    --control-size: 12px;
+    
+    --wallpaper: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%231a1a2e"/><stop offset="50%" style="stop-color:%2316213e"/><stop offset="100%" style="stop-color:%230f3460"/></linearGradient><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="3840" height="2160" fill="url(%23g)"/><rect width="3840" height="2160" filter="url(%23n)" opacity="0.08"/></svg>');
+}
+
+[data-theme="dark"] {
+    --bg-primary: rgba(30, 30, 30, 0.75);
+    --bg-secondary: rgba(45, 45, 45, 0.85);
+    --bg-tertiary: rgba(60, 60, 60, 0.9);
+    --bg-elevated: rgba(50, 50, 50, 0.95);
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.45);
+    --text-inactive: rgba(255, 255, 255, 0.25);
+    --border-color: rgba(255, 255, 255, 0.1);
+    --glass-bg: rgba(30, 30, 30, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+    --menubar-bg: rgba(20, 20, 20, 0.6);
+    --dock-bg: rgba(40, 40, 40, 0.5);
+    --window-bg: rgba(45, 45, 45, 0.92);
+    --window-header: rgba(35, 35, 35, 0.95);
+    --sidebar-bg: rgba(30, 30, 30, 0.8);
+    --button-bg: rgba(255, 255, 255, 0.1);
+    --button-hover: rgba(255, 255, 255, 0.15);
+    --button-active: rgba(255, 255, 255, 0.2);
+    --input-bg: rgba(0, 0, 0, 0.25);
+    --accent-blue: #0A84FF;
+    --accent-green: #30D158;
+    --accent-red: #FF453A;
+    --accent-orange: #FF9F0A;
+    --accent-yellow: #FFD60A;
+    --accent-purple: #BF5AF2;
+    --accent-pink: #FF375F;
+    --control-close: #FF5F57;
+    --control-minimize: #FEBC2E;
+    --control-maximize: #28C840;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+    --dock-shadow: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="light"] {
+    --bg-primary: rgba(245, 245, 247, 0.8);
+    --bg-secondary: rgba(235, 235, 240, 0.85);
+    --bg-tertiary: rgba(220, 220, 225, 0.9);
+    --bg-elevated: rgba(255, 255, 255, 0.95);
+    --text-primary: rgba(0, 0, 0, 0.9);
+    --text-secondary: rgba(0, 0, 0, 0.65);
+    --text-tertiary: rgba(0, 0, 0, 0.4);
+    --text-inactive: rgba(0, 0, 0, 0.2);
+    --border-color: rgba(0, 0, 0, 0.1);
+    --glass-bg: rgba(240, 240, 245, 0.6);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-highlight: rgba(255, 255, 255, 0.5);
+    --menubar-bg: rgba(245, 245, 247, 0.7);
+    --dock-bg: rgba(245, 245, 247, 0.55);
+    --window-bg: rgba(250, 250, 252, 0.95);
+    --window-header: rgba(240, 240, 245, 0.95);
+    --sidebar-bg: rgba(245, 245, 247, 0.9);
+    --button-bg: rgba(0, 0, 0, 0.05);
+    --button-hover: rgba(0, 0, 0, 0.08);
+    --button-active: rgba(0, 0, 0, 0.12);
+    --input-bg: rgba(0, 0, 0, 0.03);
+    --accent-blue: #007AFF;
+    --accent-green: #34C759;
+    --accent-red: #FF3B30;
+    --accent-orange: #FF9500;
+    --accent-yellow: #FFCC00;
+    --accent-purple: #AF52DE;
+    --accent-pink: #FF2D55;
+    --control-close: #FF5F57;
+    --control-minimize: #FEBC2E;
+    --control-maximize: #28C840;
+    --shadow-color: rgba(0, 0, 0, 0.2);
+    --dock-shadow: rgba(0, 0, 0, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--system-font);
+    color: var(--text-primary);
+}
+
+body {
+    background: #000;
+}
+
+.hidden {
+    display: none !important;
+}
+
+input, textarea {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.4);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.6);
+}
+
+@supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+    .glass {
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        backdrop-filter: blur(20px) saturate(180%);
+    }
+}
