@@ -22,6 +22,7 @@ function initSystem() {
         setupNotificationCenter();
         setupSpotlight();
         setupContextMenu();
+        setupQuickLook();
         setupKeyboardShortcuts();
         setupTheme();
         setupDesktopIcons();
@@ -174,24 +175,51 @@ function renderNCCalendar() {
 }
 
 function setupMenuBar() {
-    const appleMenu = document.getElementById('apple-menu');
-    const appleDropdown = document.getElementById('apple-dropdown');
     const ccBtn = document.getElementById('control-center-btn');
     const ncBtn = document.getElementById('notif-center-btn');
     const searchBtn = document.getElementById('search-menu');
     
-    appleMenu.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeAllMenus();
-        appleDropdown.classList.toggle('show');
-        appleMenu.classList.toggle('active');
-    });
+    const menuItems = [
+        { id: 'apple-menu', dropdown: 'apple-dropdown', handler: handleAppleMenuAction },
+        { id: 'file-menu', dropdown: 'file-dropdown', handler: handleFileMenuAction },
+        { id: 'edit-menu', dropdown: 'edit-dropdown', handler: handleEditMenuAction },
+        { id: 'view-menu', dropdown: 'view-dropdown', handler: handleViewMenuAction },
+        { id: 'go-menu', dropdown: 'go-dropdown', handler: handleGoMenuAction },
+        { id: 'window-menu', dropdown: 'window-dropdown', handler: handleWindowMenuAction },
+        { id: 'help-menu', dropdown: 'help-dropdown', handler: handleHelpMenuAction }
+    ];
     
-    appleDropdown.querySelectorAll('.dropdown-item').forEach(item => {
-        item.addEventListener('click', () => {
-            const action = item.dataset.action;
-            handleAppleMenuAction(action);
+    menuItems.forEach(({ id, dropdown, handler }) => {
+        const menuEl = document.getElementById(id);
+        const dropdownEl = document.getElementById(dropdown);
+        if (!menuEl || !dropdownEl) return;
+        
+        menuEl.addEventListener('mouseenter', (e) => {
+            if (document.querySelector('.dropdown-menu.show')) {
+                closeAllMenus();
+                dropdownEl.classList.add('show');
+                menuEl.classList.add('active');
+                positionDropdown(menuEl, dropdownEl);
+            }
+        });
+        
+        menuEl.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = dropdownEl.classList.contains('show');
             closeAllMenus();
+            if (!isOpen) {
+                dropdownEl.classList.add('show');
+                menuEl.classList.add('active');
+                positionDropdown(menuEl, dropdownEl);
+            }
+        });
+        
+        dropdownEl.querySelectorAll('.dropdown-item:not(.disabled)').forEach(item => {
+            item.addEventListener('click', () => {
+                const action = item.dataset.action;
+                if (action && handler) handler(action);
+                closeAllMenus();
+            });
         });
     });
     
@@ -213,6 +241,12 @@ function setupMenuBar() {
     document.addEventListener('click', () => {
         closeAllMenus();
     });
+}
+
+function positionDropdown(menuEl, dropdownEl) {
+    const menuRect = menuEl.getBoundingClientRect();
+    dropdownEl.style.left = `${menuRect.left - 8}px`;
+    dropdownEl.style.top = 'var(--menubar-height)';
 }
 
 function closeAllMenus() {
@@ -243,6 +277,112 @@ function handleAppleMenuAction(action) {
             break;
         case 'lock-screen':
             lockScreen();
+            break;
+        case 'force-quit':
+            appManager?.openApp('activity');
+            break;
+    }
+}
+
+function handleFileMenuAction(action) {
+    const activeWin = windowManager?.getActiveWindow();
+    switch(action) {
+        case 'new-finder':
+            appManager?.openApp('finder');
+            break;
+        case 'new-folder':
+            break;
+        case 'open':
+            break;
+        case 'close-window':
+            if (activeWin) windowManager.closeWindow(activeWin.id);
+            break;
+        case 'get-info':
+            break;
+        case 'rename':
+            break;
+        case 'move-trash':
+            break;
+        case 'empty-trash':
+            appManager?.openApp('trash');
+            break;
+        case 'find':
+            toggleSpotlight();
+            break;
+    }
+}
+
+function handleEditMenuAction(action) {
+    switch(action) {
+        case 'emoji':
+            alert('表情与符号面板');
+            break;
+    }
+}
+
+function handleViewMenuAction(action) {
+    switch(action) {
+        case 'enter-fullscreen':
+            const activeWin = windowManager?.getActiveWindow();
+            if (activeWin) windowManager.toggleFullscreen(activeWin.id);
+            break;
+        case 'show-path-bar':
+        case 'show-status-bar':
+        case 'show-sidebar':
+        case 'show-toolbar':
+        case 'show-view-options':
+            break;
+    }
+}
+
+function handleGoMenuAction(action) {
+    switch(action) {
+        case 'go-desktop':
+        case 'go-documents':
+        case 'go-downloads':
+        case 'go-home':
+        case 'go-pictures':
+        case 'go-applications':
+        case 'go-utilities':
+            appManager?.openApp('finder');
+            break;
+        case 'go-folder':
+            break;
+        case 'go-enclosing':
+            break;
+    }
+}
+
+function handleWindowMenuAction(action) {
+    const activeWin = windowManager?.getActiveWindow();
+    switch(action) {
+        case 'minimize':
+            if (activeWin) windowManager.minimizeWindow(activeWin.id);
+            break;
+        case 'zoom':
+            if (activeWin) windowManager.toggleMaximize(activeWin.id);
+            break;
+        case 'cycle-windows':
+            break;
+        case 'bring-all-front':
+            break;
+        case 'mission-control':
+            appManager?.openApp('missioncontrol');
+            break;
+        case 'show-all':
+            break;
+        case 'hide-others':
+            break;
+        case 'show-desktop':
+            break;
+    }
+}
+
+function handleHelpMenuAction(action) {
+    switch(action) {
+        case 'search-help':
+        case 'mac-help':
+            toggleSpotlight();
             break;
     }
 }
@@ -374,14 +514,15 @@ function performSpotlightSearch(query) {
     const apps = appManager?.getAllApps() || [];
     const matchedApps = apps.filter(a => 
         a.name.toLowerCase().includes(q) || a.id.toLowerCase().includes(q)
-    ).slice(0, 8);
-    
+    ).slice(0, 5);
+
     let html = '';
+
     if (matchedApps.length > 0) {
         html += '<div class="spotlight-section"><div class="spotlight-section-title">应用程序</div>';
         matchedApps.forEach((app, i) => {
             html += `
-                <div class="spotlight-item ${i === 0 ? 'selected' : ''}" data-app="${app.id}">
+                <div class="spotlight-item ${i === 0 ? 'selected' : ''}" data-type="app" data-app="${app.id}">
                     <div class="spotlight-item-icon">${IconGenerator.generate(app.icon, { emoji: app.emoji, size: 32 })}</div>
                     <div>
                         <div class="spotlight-item-name">${app.name}</div>
@@ -392,20 +533,128 @@ function performSpotlightSearch(query) {
         });
         html += '</div>';
     }
-    
+
+    const files = searchFiles(q);
+    if (files.length > 0) {
+        html += '<div class="spotlight-section"><div class="spotlight-section-title">文件和文件夹</div>';
+        files.forEach((file, i) => {
+            html += `
+                <div class="spotlight-item" data-type="file" data-path="${file.path}">
+                    <div class="spotlight-item-icon">${IconGenerator.generate(file.type === 'folder' ? 'folder' : 'notes', { size: 32 })}</div>
+                    <div>
+                        <div class="spotlight-item-name">${file.name}</div>
+                        <div class="spotlight-item-path">${file.path}</div>
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    }
+
+    const dictMatch = searchDictionary(q);
+    if (dictMatch) {
+        html += '<div class="spotlight-section"><div class="spotlight-section-title">词典</div>';
+        html += `
+            <div class="spotlight-item" data-type="dictionary" data-word="${q}">
+                <div class="spotlight-item-icon">${IconGenerator.generate('dictionary', { size: 32 })}</div>
+                <div>
+                    <div class="spotlight-item-name">${dictMatch.word}</div>
+                    <div class="spotlight-item-path">${dictMatch.definition}</div>
+                </div>
+            </div>
+        `;
+        html += '</div>';
+    }
+
+    if (matchedApps.length === 0 && files.length === 0 && !dictMatch) {
+        html += `
+            <div class="spotlight-section">
+                <div class="spotlight-item" data-type="web" data-query="${query}">
+                    <div class="spotlight-item-icon">
+                        <svg viewBox="0 0 24 24" width="32" height="32" style="color:var(--accent-blue)">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="spotlight-item-name">搜索网页 "${query}"</div>
+                        <div class="spotlight-item-path">使用默认搜索引擎</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     results.innerHTML = html;
     
     results.querySelectorAll('.spotlight-item').forEach(item => {
         item.addEventListener('click', () => {
+            const type = item.dataset.type;
             const appId = item.dataset.app;
-            if (appId) {
+            const filePath = item.dataset.path;
+            const webQuery = item.dataset.query;
+            
+            if (type === 'app' && appId) {
                 appManager.openApp(appId);
-                document.getElementById('spotlight').classList.remove('show');
-                document.getElementById('spotlight-input').value = '';
-                results.innerHTML = '';
+            } else if (type === 'file' && filePath) {
+                appManager.openApp('finder');
+            } else if (type === 'web' && webQuery) {
+                appManager.openApp('safari');
             }
+            
+            document.getElementById('spotlight').classList.remove('show');
+            document.getElementById('spotlight-input').value = '';
+            results.innerHTML = '';
         });
     });
+}
+
+function searchFiles(query) {
+    if (!fileSystem) return [];
+    const results = [];
+    
+    function searchPath(path) {
+        try {
+            const items = fileSystem.list(path);
+            items.forEach(item => {
+                if (item.name.toLowerCase().includes(query)) {
+                    results.push(item);
+                }
+                if (item.type === 'folder' && results.length < 5) {
+                    searchPath(item.path);
+                }
+            });
+        } catch (e) {}
+    }
+    
+    searchPath('/');
+    return results.slice(0, 5);
+}
+
+function searchDictionary(query) {
+    const dictionary = {
+        'mac': '苹果公司推出的 Macintosh 电脑系列',
+        'macos': '苹果公司为 Mac 电脑开发的操作系统',
+        'safari': '苹果公司开发的网络浏览器',
+        'finder': 'macOS 的文件管理器',
+        'dock': 'macOS 底部的应用程序启动栏',
+        'spotlight': 'macOS 的桌面搜索功能',
+        'launchpad': 'macOS 的应用程序启动界面',
+        'mission control': 'macOS 的任务调度中心',
+        'siri': '苹果公司的语音助手',
+        'icloud': '苹果公司的云存储服务',
+        'app store': '苹果的应用商店',
+        'terminal': 'macOS 的命令行终端',
+        'activity monitor': 'macOS 的系统活动监视器',
+        'keychain': 'macOS 的密码和密钥管理系统',
+        'time machine': 'macOS 的备份工具'
+    };
+    
+    for (const [word, definition] of Object.entries(dictionary)) {
+        if (word.includes(query.toLowerCase()) || query.toLowerCase().includes(word)) {
+            return { word: word.charAt(0).toUpperCase() + word.slice(1), definition };
+        }
+    }
+    return null;
 }
 
 function setupContextMenu() {
@@ -451,9 +700,272 @@ function showContextMenu(x, y) {
     });
 }
 
+function setupQuickLook() {
+    const ql = document.getElementById('quick-look');
+    if (!ql) return;
+
+    ql.addEventListener('click', (e) => {
+        if (e.target === ql) {
+            closeQuickLook();
+        }
+    });
+}
+
+function showQuickLook(item) {
+    const ql = document.getElementById('quick-look');
+    const qlTitle = document.getElementById('ql-title');
+    const qlContent = document.getElementById('ql-content');
+    if (!ql || !qlTitle || !qlContent) return;
+
+    qlTitle.textContent = item.name;
+
+    let fileContent = item.content;
+    if (item.type === 'file' && fileContent === undefined && item.path && fileSystem) {
+        try {
+            fileContent = fileSystem.readFile(item.path);
+        } catch (e) {}
+    }
+
+    if (item.type === 'folder') {
+        let itemCount = 0;
+        try {
+            const items = fileSystem?.list(item.path) || [];
+            itemCount = items.length;
+        } catch (e) {}
+        
+        qlContent.innerHTML = `
+            <div class="ql-icon-preview">
+                ${IconGenerator.generate('folder', { size: 128 })}
+                <div class="ql-info">
+                    <div class="ql-info-name">${item.name}</div>
+                    <div class="ql-info-detail">
+                        文件夹<br>
+                        ${itemCount} 个项目<br>
+                        ${item.path}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else if (item.type === 'file' && fileContent !== undefined) {
+        const isText = typeof fileContent === 'string';
+        if (isText) {
+            qlContent.innerHTML = `<div class="ql-text">${escapeHtml(fileContent)}</div>`;
+        } else {
+            qlContent.innerHTML = `
+                <div class="ql-icon-preview">
+                    ${IconGenerator.generate('notes', { size: 128 })}
+                    <div class="ql-info">
+                        <div class="ql-info-name">${item.name}</div>
+                        <div class="ql-info-detail">
+                            文稿<br>
+                            ${item.path}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } else if (item.appId) {
+        const app = appManager?.getApp(item.appId);
+        qlContent.innerHTML = `
+            <div class="ql-icon-preview">
+                ${IconGenerator.generate(app?.icon || 'default', { emoji: app?.emoji, size: 128 })}
+                <div class="ql-info">
+                    <div class="ql-info-name">${item.name}</div>
+                    <div class="ql-info-detail">
+                        应用程序<br>
+                        版本 1.0<br>
+                        ${app?.name || item.name}
+                    </div>
+                </div>
+            </div>
+        `;
+    } else {
+        qlContent.innerHTML = `
+            <div class="ql-icon-preview">
+                ${IconGenerator.generate('default', { size: 128 })}
+                <div class="ql-info">
+                    <div class="ql-info-name">${item.name}</div>
+                    <div class="ql-info-detail">
+                        ${item.path || ''}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    ql.classList.add('show');
+}
+
+function closeQuickLook() {
+    const ql = document.getElementById('quick-look');
+    if (ql) {
+        ql.classList.remove('show');
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function getSelectedItem() {
+    const selectedDesktopIcon = document.querySelector('.desktop-icon.selected');
+    if (selectedDesktopIcon) {
+        const appId = selectedDesktopIcon.dataset.appId;
+        const path = selectedDesktopIcon.dataset.path;
+        const type = selectedDesktopIcon.dataset.type;
+        const label = selectedDesktopIcon.querySelector('.desktop-icon-label')?.textContent;
+        
+        if (appId) {
+            return { name: label, appId, type: 'app' };
+        } else if (path) {
+            return { name: label, path, type: type || 'file' };
+        }
+    }
+
+    const activeWindow = document.querySelector('.window:not(.minimized):not(.minimizing)');
+    if (activeWindow) {
+        const selectedFinderItem = activeWindow.querySelector('.finder-list-item.selected, .finder-grid-item.selected');
+        if (selectedFinderItem) {
+            const path = selectedFinderItem.dataset.path;
+            const type = selectedFinderItem.dataset.type;
+            const name = path.split('/').pop();
+            return { name, path, type: type || 'file' };
+        }
+    }
+
+    return null;
+}
+
 function setupKeyboardShortcuts() {
+    let cmdTabActive = false;
+    let cmdTabIndex = 0;
+    let cmdTabApps = [];
+
+    function showAppSwitcher() {
+        const switcher = document.getElementById('app-switcher');
+        const itemsContainer = document.getElementById('app-switcher-items');
+        if (!switcher || !itemsContainer || !appManager) return;
+
+        const runningAppIds = Array.from(appManager.runningApps.values());
+        const uniqueAppIds = [...new Set(runningAppIds)];
+        
+        if (uniqueAppIds.length === 0) {
+            uniqueAppIds.push('finder');
+        }
+
+        cmdTabApps = uniqueAppIds;
+        cmdTabIndex = 0;
+
+        itemsContainer.innerHTML = '';
+        cmdTabApps.forEach((appId, index) => {
+            const app = appManager.getApp(appId);
+            if (!app) return;
+            
+            const item = document.createElement('div');
+            item.className = 'app-switcher-item' + (index === 0 ? ' selected' : '');
+            item.dataset.appId = appId;
+            item.innerHTML = `
+                <div class="app-switcher-item-icon">${IconGenerator.generate(app.icon, { emoji: app.emoji })}</div>
+                <div class="app-switcher-item-name">${app.name}</div>
+            `;
+            itemsContainer.appendChild(item);
+        });
+
+        switcher.classList.add('show');
+    }
+
+    function hideAppSwitcher() {
+        const switcher = document.getElementById('app-switcher');
+        if (switcher) {
+            switcher.classList.remove('show');
+        }
+        
+        if (cmdTabApps.length > 0 && appManager) {
+            const selectedAppId = cmdTabApps[cmdTabIndex];
+            const windows = windowManager?.getWindowsByApp(selectedAppId);
+            if (windows && windows.length > 0) {
+                const win = windows[0];
+                if (win.minimized) {
+                    windowManager.restoreWindow(win.id);
+                } else {
+                    windowManager.focusWindow(win.id);
+                }
+            } else {
+                appManager.openApp(selectedAppId);
+            }
+        }
+    }
+
+    function selectNextApp(reverse = false) {
+        const items = document.querySelectorAll('.app-switcher-item');
+        if (items.length === 0) return;
+
+        items[cmdTabIndex].classList.remove('selected');
+        
+        if (reverse) {
+            cmdTabIndex = (cmdTabIndex - 1 + cmdTabApps.length) % cmdTabApps.length;
+        } else {
+            cmdTabIndex = (cmdTabIndex + 1) % cmdTabApps.length;
+        }
+        
+        items[cmdTabIndex].classList.add('selected');
+    }
+
+    function cycleAppWindows() {
+        if (!windowManager || !appManager) return;
+        
+        const activeWin = windowManager.getActiveWindow();
+        if (!activeWin) return;
+        
+        const appWindows = windowManager.getWindowsByApp(activeWin.appName);
+        if (appWindows.length <= 1) return;
+        
+        const currentIndex = appWindows.findIndex(w => w.id === activeWin.id);
+        const nextIndex = (currentIndex + 1) % appWindows.length;
+        const nextWin = appWindows[nextIndex];
+        
+        if (nextWin.minimized) {
+            windowManager.restoreWindow(nextWin.id);
+        } else {
+            windowManager.focusWindow(nextWin.id);
+        }
+    }
+
+    function hideCurrentApp() {
+        if (!windowManager || !appManager) return;
+        
+        const activeWin = windowManager.getActiveWindow();
+        if (!activeWin) return;
+        
+        const appWindows = windowManager.getWindowsByApp(activeWin.appName);
+        appWindows.forEach(win => {
+            if (!win.minimized) {
+                windowManager.minimizeWindow(win.id);
+            }
+        });
+    }
+
+    function showDesktop() {
+        if (!windowManager) return;
+        
+        const allWindows = Array.from(windowManager.windows.values());
+        const anyVisible = allWindows.some(w => !w.minimized);
+        
+        allWindows.forEach(win => {
+            if (anyVisible && !win.minimized) {
+                windowManager.minimizeWindow(win.id);
+            } else if (!anyVisible && win.minimized) {
+                windowManager.restoreWindow(win.id);
+            }
+        });
+    }
+
     document.addEventListener('keydown', (e) => {
-        if (e.metaKey || e.ctrlKey) {
+        const hasModifier = e.metaKey || e.ctrlKey;
+        
+        if (hasModifier) {
             switch(e.key.toLowerCase()) {
                 case 'w':
                     e.preventDefault();
@@ -468,9 +980,93 @@ function setupKeyboardShortcuts() {
                 case 'q':
                     e.preventDefault();
                     const a = windowManager?.getActiveWindow();
-                    if (a) windowManager.closeWindow(a.id);
+                    if (a) {
+                        const appWindows = windowManager.getWindowsByApp(a.appName);
+                        appWindows.forEach(w => windowManager.closeWindow(w.id));
+                    }
+                    break;
+                case 'tab':
+                    e.preventDefault();
+                    if (!cmdTabActive) {
+                        cmdTabActive = true;
+                        showAppSwitcher();
+                    } else {
+                        selectNextApp(e.shiftKey);
+                    }
+                    break;
+                case '`':
+                case '~':
+                    e.preventDefault();
+                    cycleAppWindows();
+                    break;
+                case 'h':
+                    if (!e.shiftKey) {
+                        e.preventDefault();
+                        hideCurrentApp();
+                    }
                     break;
             }
+        }
+
+        if ((e.metaKey || e.ctrlKey) && e.altKey) {
+            switch(e.key.toLowerCase()) {
+                case 'h':
+                    e.preventDefault();
+                    if (windowManager) {
+                        const activeWin = windowManager.getActiveWindow();
+                        if (activeWin) {
+                            windowManager.windows.forEach((win, id) => {
+                                if (win.appName !== activeWin.appName && !win.minimized) {
+                                    windowManager.minimizeWindow(id);
+                                }
+                            });
+                        }
+                    }
+                    break;
+            }
+        }
+
+        if (e.key === 'F11') {
+            e.preventDefault();
+            showDesktop();
+        }
+
+        if ((e.metaKey || e.ctrlKey) && e.code === 'Space') {
+            e.preventDefault();
+            toggleSpotlight();
+        }
+
+        if (e.key === 'Escape') {
+            const lp = document.getElementById('launchpad-overlay');
+            if (lp) {
+                appManager?.closeLaunchpad();
+            }
+            const ql = document.getElementById('quick-look');
+            if (ql?.classList.contains('show')) {
+                closeQuickLook();
+                e.preventDefault();
+            }
+        }
+
+        if (e.code === 'Space' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+            const ql = document.getElementById('quick-look');
+            if (ql?.classList.contains('show')) {
+                closeQuickLook();
+                e.preventDefault();
+            } else {
+                const selected = getSelectedItem();
+                if (selected) {
+                    e.preventDefault();
+                    showQuickLook(selected);
+                }
+            }
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        if ((e.key === 'Meta' || e.key === 'Control') && cmdTabActive) {
+            cmdTabActive = false;
+            hideAppSwitcher();
         }
     });
 }
@@ -502,6 +1098,40 @@ function renderDesktopIcons() {
     const container = document.getElementById('desktop-icons');
     if (!container) return;
     container.innerHTML = '';
+
+    // 先放桌面应用快捷方式（常用应用放桌面）
+    const desktopAppIds = ['macintosh-hd', 'safari', 'mail', 'notes', 'calculator', 'textedit', 'preview', 'stickies', 'terminal'];
+    
+    desktopAppIds.forEach((appId) => {
+        if (appId === 'macintosh-hd') {
+            // Macintosh HD 磁盘图标
+            const icon = document.createElement('div');
+            icon.className = 'desktop-icon';
+            icon.innerHTML = `
+                <div class="desktop-icon-img">${IconGenerator.generate('folder', { size: 64 })}</div>
+                <div class="desktop-icon-label">Macintosh HD</div>
+            `;
+            icon.addEventListener('dblclick', () => {
+                appManager?.openApp('finder');
+            });
+            container.appendChild(icon);
+            return;
+        }
+        const app = appManager?.apps?.get(appId);
+        if (!app) return;
+        const icon = document.createElement('div');
+        icon.className = 'desktop-icon desktop-app-shortcut';
+        icon.dataset.appId = appId;
+
+        icon.innerHTML = `
+            <div class="desktop-icon-img">${IconGenerator.generate(app.icon, { emoji: app.emoji, size: 64 })}</div>
+            <div class="desktop-icon-label">${app.name}</div>
+        `;
+        icon.addEventListener('dblclick', () => {
+            appManager?.openApp(appId);
+        });
+        container.appendChild(icon);
+    });
 
     // Show files from /Desktop
     const desktopFiles = fileSystem.list('/Desktop');

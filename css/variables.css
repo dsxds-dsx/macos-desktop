@@ -2,12 +2,13 @@
     --system-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
     --mono-font: "SF Mono", "Monaco", "Inconsolata", "Menlo", Consolas, monospace;
     
-    --dock-height: 72px;
+    --dock-height: 80px;
     --menubar-height: 28px;
     --window-radius: 12px;
     --control-size: 12px;
     
-    --wallpaper: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160"><defs><linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%231a1a2e"/><stop offset="50%" style="stop-color:%2316213e"/><stop offset="100%" style="stop-color:%230f3460"/></linearGradient><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter></defs><rect width="3840" height="2160" fill="url(%23g)"/><rect width="3840" height="2160" filter="url(%23n)" opacity="0.08"/></svg>');
+    --wallpaper: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160"><defs><radialGradient id="g1" cx="20%" cy="30%" r="60%"><stop offset="0%" style="stop-color:%236366F1"/><stop offset="50%" style="stop-color:%234F46E5"/><stop offset="100%" style="stop-color:%231E1B4B"/></radialGradient><radialGradient id="g2" cx="80%" cy="70%" r="50%"><stop offset="0%" style="stop-color:%2306B6D4"/><stop offset="60%" style="stop-color:%230891B2"/><stop offset="100%" style="stop-color:%23164E63"/></radialGradient><radialGradient id="g3" cx="50%" cy="100%" r="70%"><stop offset="0%" style="stop-color:%238B5CF6"/><stop offset="100%" style="stop-color:%232E1065"/></radialGradient><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="4" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0.3"/></filter></defs><rect width="3840" height="2160" fill="%230F172A"/><rect width="3840" height="2160" fill="url(%23g1)" opacity="0.6"/><rect width="3840" height="2160" fill="url(%23g2)" opacity="0.5"/><rect width="3840" height="2160" fill="url(%23g3)" opacity="0.4"/><rect width="3840" height="2160" filter="url(%23n)" opacity="0.12"/></svg>');
+    --wallpaper-light: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160"><defs><radialGradient id="gl1" cx="20%" cy="20%" r="60%"><stop offset="0%" style="stop-color:%23DBEAFE"/><stop offset="100%" style="stop-color:%2393C5FD"/></radialGradient><radialGradient id="gl2" cx="80%" cy="80%" r="50%"><stop offset="0%" style="stop-color:%23DDD6FE"/><stop offset="100%" style="stop-color:%23A78BFA"/></radialGradient><radialGradient id="gl3" cx="50%" cy="0%" r="70%"><stop offset="0%" style="stop-color:%23FCE7F3"/><stop offset="100%" style="stop-color:%23F9A8D4"/></radialGradient></defs><rect width="3840" height="2160" fill="%23EFF6FF"/><rect width="3840" height="2160" fill="url(%23gl1)" opacity="0.7"/><rect width="3840" height="2160" fill="url(%23gl2)" opacity="0.5"/><rect width="3840" height="2160" fill="url(%23gl3)" opacity="0.4"/></svg>');
 }
 
 [data-theme="dark"] {

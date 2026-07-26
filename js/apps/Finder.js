@@ -2,6 +2,7 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
     let currentPath = '/Documents';
     let viewMode = 'list';
     let searchQuery = '';
+    let selectedPath = null;
 
     const sidebarItems = [
         { id: 'favorites', label: '个人收藏', type: 'header' },
@@ -133,7 +134,7 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
                 <div class="finder-grid-view">
                     ${items.length === 0 ? '<div class="finder-empty">此文件夹为空</div>' : ''}
                     ${items.map(item => `
-                        <div class="finder-grid-item" data-path="${item.path}" data-type="${item.type}">
+                        <div class="finder-grid-item ${selectedPath === item.path ? 'selected' : ''}" data-path="${item.path}" data-type="${item.type}">
                             <div class="finder-grid-icon">${IconGenerator.generate(item.type === 'folder' ? 'folder' : 'notes', { size: 64 })}</div>
                             <div class="finder-grid-name">${item.name}</div>
                         </div>
@@ -151,7 +152,7 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
                     </div>
                     ${items.length === 0 ? '<div class="finder-empty">此文件夹为空</div>' : ''}
                     ${items.map(item => `
-                        <div class="finder-list-item" data-path="${item.path}" data-type="${item.type}">
+                        <div class="finder-list-item ${selectedPath === item.path ? 'selected' : ''}" data-path="${item.path}" data-type="${item.type}">
                             <div class="finder-list-cell name">
                                 <div class="finder-list-icon">${IconGenerator.generate(item.type === 'folder' ? 'folder' : 'notes', { size: 20 })}</div>
                                 <span>${item.name}</span>
@@ -184,6 +185,7 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
                 const type = item.dataset.type;
                 if (type === 'folder') {
                     currentPath = path;
+                    selectedPath = null;
                     render();
                 } else {
                     if (window.appManager) {
@@ -199,6 +201,23 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
                 }
             });
         });
+
+        body.onclick = (e) => {
+            const item = e.target.closest('.finder-grid-item, .finder-list-item');
+            if (item) {
+                e.stopPropagation();
+                selectedPath = item.dataset.path;
+                body.querySelectorAll('.finder-grid-item.selected, .finder-list-item.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                item.classList.add('selected');
+            } else {
+                selectedPath = null;
+                body.querySelectorAll('.finder-grid-item.selected, .finder-list-item.selected').forEach(el => {
+                    el.classList.remove('selected');
+                });
+            }
+        };
     }
 
     function render() {

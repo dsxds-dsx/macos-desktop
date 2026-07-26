@@ -71,12 +71,12 @@
                     </svg>
                 </div>
                 <div class="menubar-item app-menu" id="app-menu">访达</div>
-                <div class="menubar-item" data-menu="file">文件</div>
-                <div class="menubar-item" data-menu="edit">编辑</div>
-                <div class="menubar-item" data-menu="view">显示</div>
-                <div class="menubar-item" data-menu="go">前往</div>
-                <div class="menubar-item" data-menu="window">窗口</div>
-                <div class="menubar-item" data-menu="help">帮助</div>
+                <div class="menubar-item" id="file-menu">文件</div>
+                <div class="menubar-item" id="edit-menu">编辑</div>
+                <div class="menubar-item" id="view-menu">显示</div>
+                <div class="menubar-item" id="go-menu">前往</div>
+                <div class="menubar-item" id="window-menu">窗口</div>
+                <div class="menubar-item" id="help-menu">帮助</div>
             </div>
             <div class="menubar-right">
                 <div class="menubar-item" id="battery-menu" title="85%">
@@ -118,18 +118,103 @@
         <div class="dropdown-menu" id="apple-dropdown">
             <div class="dropdown-item" data-action="about">关于本机</div>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-item" data-action="system-settings">系统设置...</div>
+            <div class="dropdown-item" data-action="system-settings">系统设置...<span class="dropdown-shortcut">⌘,</span></div>
             <div class="dropdown-item" data-action="app-store">App Store...</div>
             <div class="dropdown-divider"></div>
             <div class="dropdown-item" data-action="recent-items">最近使用的项目</div>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-item" data-action="force-quit">强制退出...</div>
+            <div class="dropdown-item" data-action="force-quit">强制退出...<span class="dropdown-shortcut">⌥⌘⎋</span></div>
             <div class="dropdown-divider"></div>
             <div class="dropdown-item" data-action="sleep">睡眠</div>
             <div class="dropdown-item" data-action="restart">重新启动...</div>
             <div class="dropdown-item" data-action="shutdown">关机...</div>
             <div class="dropdown-divider"></div>
-            <div class="dropdown-item" data-action="lock-screen">锁定屏幕</div>
+            <div class="dropdown-item" data-action="lock-screen">锁定屏幕<span class="dropdown-shortcut">⌃⌘Q</span></div>
+        </div>
+
+        <div class="dropdown-menu" id="file-dropdown">
+            <div class="dropdown-item" data-action="new-finder">新建访达窗口<span class="dropdown-shortcut">⌘N</span></div>
+            <div class="dropdown-item" data-action="new-folder">新建文件夹<span class="dropdown-shortcut">⇧⌘N</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="open">打开<span class="dropdown-shortcut">⌘O</span></div>
+            <div class="dropdown-item" data-action="close-window">关闭窗口<span class="dropdown-shortcut">⌘W</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="get-info">显示简介<span class="dropdown-shortcut">⌘I</span></div>
+            <div class="dropdown-item" data-action="rename">重命名<span class="dropdown-shortcut">⏎</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="move-trash">移到废纸篓<span class="dropdown-shortcut">⌘⌫</span></div>
+            <div class="dropdown-item" data-action="empty-trash">清倒废纸篓...</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="find">查找<span class="dropdown-shortcut">⌘F</span></div>
+        </div>
+
+        <div class="dropdown-menu" id="edit-dropdown">
+            <div class="dropdown-item disabled">撤销<span class="dropdown-shortcut">⌘Z</span></div>
+            <div class="dropdown-item disabled">重做<span class="dropdown-shortcut">⇧⌘Z</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item disabled">剪切<span class="dropdown-shortcut">⌘X</span></div>
+            <div class="dropdown-item disabled">拷贝<span class="dropdown-shortcut">⌘C</span></div>
+            <div class="dropdown-item disabled">粘贴<span class="dropdown-shortcut">⌘V</span></div>
+            <div class="dropdown-item disabled">全选<span class="dropdown-shortcut">⌘A</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="start-dictation">开始听写...<span class="dropdown-shortcut">fn fn</span></div>
+            <div class="dropdown-item" data-action="emoji">表情与符号<span class="dropdown-shortcut">⌃⌘空格</span></div>
+        </div>
+
+        <div class="dropdown-menu" id="view-dropdown">
+            <div class="dropdown-item" data-action="view-icons">以图标显示<span class="dropdown-shortcut">⌘1</span></div>
+            <div class="dropdown-item" data-action="view-list">以列表显示<span class="dropdown-shortcut">⌘2</span></div>
+            <div class="dropdown-item" data-action="view-columns">以分栏显示<span class="dropdown-shortcut">⌘3</span></div>
+            <div class="dropdown-item" data-action="view-gallery">以画廊显示<span class="dropdown-shortcut">⌘4</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="arrange-by">排列方式</div>
+            <div class="dropdown-item" data-action="sort-by">排序方式</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="enter-fullscreen">进入全屏<span class="dropdown-shortcut">⌃⌘F</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="show-path-bar">显示路径栏<span class="dropdown-shortcut">⌥⌘P</span></div>
+            <div class="dropdown-item" data-action="show-status-bar">显示状态栏<span class="dropdown-shortcut">⌘/</span></div>
+            <div class="dropdown-item" data-action="show-sidebar">显示边栏<span class="dropdown-shortcut">⌃⌘S</span></div>
+            <div class="dropdown-item" data-action="show-toolbar">显示工具栏</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="customize-toolbar">自定工具栏...</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="show-view-options">显示显示选项<span class="dropdown-shortcut">⌘J</span></div>
+        </div>
+
+        <div class="dropdown-menu" id="go-dropdown">
+            <div class="dropdown-item" data-action="go-recents">最近使用<span class="dropdown-shortcut">⇧⌘F</span></div>
+            <div class="dropdown-item" data-action="go-documents">文稿<span class="dropdown-shortcut">⇧⌘O</span></div>
+            <div class="dropdown-item" data-action="go-desktop">桌面<span class="dropdown-shortcut">⇧⌘D</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="go-computer">电脑<span class="dropdown-shortcut">⇧⌘C</span></div>
+            <div class="dropdown-item" data-action="go-home">个人<span class="dropdown-shortcut">⇧⌘H</span></div>
+            <div class="dropdown-item" data-action="go-downloads">下载<span class="dropdown-shortcut">⌥⌘L</span></div>
+            <div class="dropdown-item" data-action="go-pictures">图片<span class="dropdown-shortcut">⇧⌘P</span></div>
+            <div class="dropdown-item" data-action="go-applications">应用程序<span class="dropdown-shortcut">⇧⌘A</span></div>
+            <div class="dropdown-item" data-action="go-utilities">实用工具<span class="dropdown-shortcut">⇧⌘U</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="go-folder">前往文件夹...<span class="dropdown-shortcut">⇧⌘G</span></div>
+            <div class="dropdown-item" data-action="go-enclosing">前往上层文件夹<span class="dropdown-shortcut">⌘↑</span></div>
+        </div>
+
+        <div class="dropdown-menu" id="window-dropdown">
+            <div class="dropdown-item" data-action="minimize">最小化<span class="dropdown-shortcut">⌘M</span></div>
+            <div class="dropdown-item" data-action="zoom">缩放</div>
+            <div class="dropdown-item" data-action="cycle-windows">循环显示窗口<span class="dropdown-shortcut">⌘`</span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="bring-all-front">全部前置</div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="mission-control">调度中心<span class="dropdown-shortcut">⌃↑</span></div>
+            <div class="dropdown-item" data-action="show-all">全部窗口<span class="dropdown-shortcut">⌃↓</span></div>
+            <div class="dropdown-item" data-action="hide-others">隐藏其他<span class="dropdown-shortcut">⌥⌘H</span></div>
+            <div class="dropdown-item" data-action="show-desktop">显示桌面<span class="dropdown-shortcut">F11</span></div>
+        </div>
+
+        <div class="dropdown-menu" id="help-dropdown">
+            <div class="dropdown-item" data-action="search-help">搜索<span style="flex:1;"></span></div>
+            <div class="dropdown-divider"></div>
+            <div class="dropdown-item" data-action="mac-help">macOS 帮助</div>
         </div>
 
         <div class="windows-container" id="windows-container"></div>
@@ -229,6 +314,11 @@
             </div>
         </div>
 
+        <div class="app-switcher" id="app-switcher">
+            <div class="app-switcher-items" id="app-switcher-items"></div>
+            <div class="app-switcher-hint">按住 ⌘ 键继续，按 Tab 键切换，松开打开</div>
+        </div>
+
         <div class="spotlight" id="spotlight">
             <div class="spotlight-search">
                 <svg viewBox="0 0 24 24" width="22" height="22" class="spotlight-icon">
@@ -240,6 +330,13 @@
         </div>
 
         <div class="context-menu" id="context-menu"></div>
+
+        <div class="quick-look" id="quick-look">
+            <div class="quick-look-container">
+                <div class="quick-look-title" id="ql-title"></div>
+                <div class="quick-look-content" id="ql-content"></div>
+            </div>
+        </div>
     </div>
 
     <div id="screensaver" class="screensaver hidden">
@@ -301,6 +398,17 @@
     <script src="js/apps/Keynote.js"></script>
     <script src="js/apps/GarageBand.js"></script>
     <script src="js/apps/iMovie.js"></script>
+    <script src="js/apps/Trash.js"></script>
+    <script src="js/apps/Launchpad.js"></script>
+    <script src="js/apps/Siri.js"></script>
+    <script src="js/apps/FindMy.js"></script>
+    <script src="js/apps/Shortcuts.js"></script>
+    <script src="js/apps/Passwords.js"></script>
+    <script src="js/apps/Freeform.js"></script>
+    <script src="js/apps/PhotoBooth_Home_GameCenter.js"></script>
+    <script src="js/apps/MissionControl_Automator_TimeMachine.js"></script>
+    <script src="js/apps/Journal_TestFlight_Tips.js"></script>
+    <script src="js/apps/Phone_iPhoneMirror.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

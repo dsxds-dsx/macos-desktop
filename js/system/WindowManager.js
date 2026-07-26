@@ -237,7 +237,9 @@ class WindowManager {
         const winData = this.windows.get(id);
         if (!winData) return;
 
+        winData.element.classList.add('closing');
         winData.element.classList.remove('open');
+        
         setTimeout(() => {
             if (winData.element.parentNode) {
                 winData.element.parentNode.removeChild(winData.element);
@@ -259,29 +261,107 @@ class WindowManager {
 
     minimizeWindow(id) {
         const winData = this.windows.get(id);
-        if (!winData) return;
+        if (!winData || winData.minimized) return;
 
-        winData.element.classList.add('minimizing');
+        const dockItem = document.querySelector(`.dock-item[data-app-id="${winData.appName}"]`);
+        const winRect = winData.element.getBoundingClientRect();
+        
+        let targetX, targetY, targetScaleX, targetScaleY;
+        
+        if (dockItem) {
+            const dockRect = dockItem.getBoundingClientRect();
+            const winCenterX = winRect.left + winRect.width / 2;
+            const winCenterY = winRect.top + winRect.height / 2;
+            const dockCenterX = dockRect.left + dockRect.width / 2;
+            const dockCenterY = dockRect.top + dockRect.height / 2;
+            
+            targetX = dockCenterX - winCenterX;
+            targetY = dockCenterY - winCenterY;
+            targetScaleX = dockRect.width / winRect.width;
+            targetScaleY = dockRect.height / winRect.height;
+        } else {
+            targetX = 0;
+            targetY = window.innerHeight - winRect.top - winRect.height / 2;
+            targetScaleX = 0.1;
+            targetScaleY = 0.1;
+        }
+
+        winData.element.style.transition = 'none';
+        winData.element.style.transformOrigin = 'center center';
+        
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                winData.element.style.transition = 'all 0.45s cubic-bezier(0.4, 0, 1, 1)';
+                winData.element.style.transform = `translate(${targetX}px, ${targetY}px) scale(${targetScaleX}, ${targetScaleY})`;
+                winData.element.style.opacity = '0.3';
+                winData.element.style.borderRadius = '22%';
+            });
+        });
+
         winData.minimized = true;
         
-        setTimeout(() => {
+        winData._minimizeTimeout = setTimeout(() => {
             winData.element.style.display = 'none';
-            winData.element.classList.remove('minimizing');
-        }, 300);
+            winData.element.style.transform = '';
+            winData.element.style.opacity = '';
+            winData.element.style.borderRadius = '';
+            winData.element.style.transition = '';
+            winData.element.style.transformOrigin = '';
+        }, 450);
 
         this.updateDockState(winData.appName, true, 'minimized');
     }
 
     restoreWindow(id) {
         const winData = this.windows.get(id);
-        if (!winData) return;
+        if (!winData || !winData.minimized) return;
 
+        if (winData._minimizeTimeout) {
+            clearTimeout(winData._minimizeTimeout);
+            winData._minimizeTimeout = null;
+        }
+
+        const dockItem = document.querySelector(`.dock-item[data-app-id="${winData.appName}"]`);
+        
         winData.element.style.display = '';
-        winData.element.classList.add('open');
+        winData.element.style.opacity = '0.3';
+        winData.element.style.borderRadius = '22%';
+        winData.element.style.transformOrigin = 'center center';
+        winData.element.style.transition = 'none';
+
+        if (dockItem) {
+            const dockRect = dockItem.getBoundingClientRect();
+            const winRect = winData.element.getBoundingClientRect();
+            const winCenterX = winRect.left + winRect.width / 2;
+            const winCenterY = winRect.top + winRect.height / 2;
+            const dockCenterX = dockRect.left + dockRect.width / 2;
+            const dockCenterY = dockRect.top + dockRect.height / 2;
+            
+            const startX = dockCenterX - winCenterX;
+            const startY = dockCenterY - winCenterY;
+            const startScaleX = dockRect.width / winRect.width;
+            const startScaleY = dockRect.height / winRect.height;
+            
+            winData.element.style.transform = `translate(${startX}px, ${startY}px) scale(${startScaleX}, ${startScaleY})`;
+        } else {
+            winData.element.style.transform = 'scale(0.1) translateY(80vh)';
+        }
+
         winData.minimized = false;
-        winData.maximized = false;
-        winData.fullscreen = false;
-        winData.element.classList.remove('maximized', 'fullscreen');
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                winData.element.style.transition = 'all 0.45s cubic-bezier(0.32, 0.72, 0, 1)';
+                winData.element.style.transform = '';
+                winData.element.style.opacity = '';
+                winData.element.style.borderRadius = '';
+                
+                setTimeout(() => {
+                    winData.element.style.transition = '';
+                    winData.element.style.transformOrigin = '';
+                }, 450);
+            });
+        });
         
         this.focusWindow(id);
         this.updateDockState(winData.appName, true, 'normal');
