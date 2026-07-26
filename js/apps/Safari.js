@@ -2,7 +2,7 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
     let history = [''];
     let historyIndex = 0;
     let currentUrl = '';
-    let useProxy = false;
+    let useProxy = true;
     let checkTimers = [];
 
     // Proxy services that strip X-Frame-Options headers
@@ -244,7 +244,7 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
             body.innerHTML = `
                 <div class="safari-content" style="padding:0;">
                     <div class="safari-iframe-container" id="safari-frame-container-${windowId}">
-                        ${useProxy ? `<div style="background:#fff3cd;color:#856404;padding:8px 12px;font-size:12px;text-align:center;"> 代理模式：${PROXY_SERVICES[currentProxyIndex].name}</div>` : ''}
+                        ${useProxy ? `<div style="background:rgba(0,122,255,0.08);color:#007aff;padding:6px 12px;font-size:11px;text-align:center;border-bottom:0.5px solid rgba(0,122,255,0.15);"> 通过 ${PROXY_SERVICES[currentProxyIndex].name} 代理加载</div>` : ''}
                         <iframe
                             id="safari-iframe-${windowId}"
                             src="${iframeSrc}"
