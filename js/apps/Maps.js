@@ -27,7 +27,7 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
             <div class="maps-nav-overlay" id="maps-nav-overlay-${windowId}" style="display:none;">
                 <div class="maps-nav-top">
                     <div class="maps-nav-direction" id="maps-nav-direction">
-                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                        <svg viewBox="0 0 48 48" width="48" height="48" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M24 4v36M12 16l12-12 12 12"/></svg>
                     </div>
                     <div class="maps-nav-info">
                         <div class="maps-nav-distance" id="maps-nav-distance">-- 米</div>
@@ -226,30 +226,50 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
             className: 'maps-triangle-marker',
             html: `<div class="maps-triangle-wrap" style="transform: rotate(${bearing}deg);">
                 <div class="maps-triangle-shape">
-                    <svg viewBox="0 0 40 56" width="40" height="56">
+                    <svg viewBox="0 0 48 64" width="48" height="64">
                         <defs>
                             <linearGradient id="triGrad" x1="0" y1="0" x2="0" y2="1">
                                 <stop offset="0%" stop-color="#4da3ff"/>
                                 <stop offset="100%" stop-color="#0066ff"/>
                             </linearGradient>
                         </defs>
-                        <path d="M20 0 C20 0, 0 34, 0 42 C0 50, 9 56, 20 56 C31 56, 40 50, 40 42 C40 34, 20 0, 20 0Z" fill="url(#triGrad)" stroke="#fff" stroke-width="2.5"/>
-                        <circle cx="20" cy="42" r="6" fill="rgba(255,255,255,0.4)"/>
+                        <path d="M24 0 L40 52 L24 44 L8 52 Z" fill="url(#triGrad)" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
                     </svg>
                 </div>
                 <div class="maps-triangle-halo"></div>
             </div>`,
-            iconSize: [40, 56],
-            iconAnchor: [20, 42]
+            iconSize: [48, 64],
+            iconAnchor: [24, 44]
+        });
+    }
+
+    function createWaterDropIcon() {
+        return L.divIcon({
+            className: 'maps-waterdrop-marker',
+            html: `<div class="maps-waterdrop-shape">
+                <svg viewBox="0 0 36 52" width="36" height="52">
+                    <defs>
+                        <radialGradient id="dropGrad" cx="40%" cy="35%" r="60%">
+                            <stop offset="0%" stop-color="#5cb3ff"/>
+                            <stop offset="100%" stop-color="#007aff"/>
+                        </radialGradient>
+                    </defs>
+                    <path d="M18 0 C18 0, 0 22, 0 34 C0 44, 8 52, 18 52 C28 52, 36 44, 36 34 C36 22, 18 0, 18 0Z" fill="url(#dropGrad)" stroke="#fff" stroke-width="2"/>
+                    <circle cx="14" cy="30" r="4" fill="rgba(255,255,255,0.5)"/>
+                </svg>
+            </div>`,
+            iconSize: [36, 52],
+            iconAnchor: [18, 44]
         });
     }
 
     function addUserMarker(lat, lng, bearing) {
+        const icon = (navActive || navMode) ? createTriangleIcon(bearing) : createWaterDropIcon();
         if (userMarker) {
             userMarker.setLatLng([lat, lng]);
-            userMarker.setIcon(createTriangleIcon(bearing));
+            userMarker.setIcon(icon);
         } else {
-            userMarker = L.marker([lat, lng], { icon: createTriangleIcon(bearing), interactive: false, zIndexOffset: 1000 });
+            userMarker = L.marker([lat, lng], { icon: icon, interactive: false, zIndexOffset: 1000 });
             userMarker.addTo(map);
         }
     }
@@ -367,11 +387,11 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
             const dirIcon = body.querySelector('#maps-nav-direction svg');
             if (dirIcon) {
                 if (directionIcon === 'right') {
-                    dirIcon.innerHTML = '<path d="M5 19V5h14M12 5l7 7-7 7"/>';
+                    dirIcon.innerHTML = '<path d="M8 20V4h12v4H12v12h-4z" fill="#fff"/><path d="M16 10l8 8-8 8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
                 } else if (directionIcon === 'left') {
-                    dirIcon.innerHTML = '<path d="M19 19V5H5M12 5L5 12l7 7"/>';
+                    dirIcon.innerHTML = '<path d="M40 20V4H28v4h8v12h4z" fill="#fff"/><path d="M32 10l-8 8 8 8" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
                 } else {
-                    dirIcon.innerHTML = '<path d="M12 19V5M5 12l7-7 7 7"/>';
+                    dirIcon.innerHTML = '<path d="M24 4v36M12 16l12-12 12 12" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
                 }
             }
 

@@ -1550,6 +1550,18 @@
     animation: maps-pulse 2s ease-out infinite;
 }
 
+.maps-waterdrop-marker {
+    background: transparent !important;
+    border: none !important;
+}
+
+.maps-waterdrop-shape {
+    position: relative;
+    width: 36px;
+    height: 52px;
+    filter: drop-shadow(0 2px 6px rgba(0,122,255,0.4));
+}
+
 .maps-dest-marker {
     background: transparent !important;
     border: none !important;
