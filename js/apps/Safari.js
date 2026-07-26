@@ -9,9 +9,13 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
     const PROXY_SERVICES = [
         { name: 'AllOrigins', prefix: 'https://api.allorigins.win/raw?url=' },
         { name: 'CORS Proxy', prefix: 'https://corsproxy.io/?' },
-        { name: 'CodeTabs', prefix: 'https://api.codetabs.com/v1/proxy/?quest=' }
+        { name: 'CodeTabs', prefix: 'https://api.codetabs.com/v1/proxy/?quest=' },
+        { name: 'ThingProxy', prefix: 'https://thingproxy.freeboard.io/fetch/' },
+        { name: 'CORS Anywhere', prefix: 'https://cors-anywhere.herokuapp.com/' }
     ];
     let currentProxyIndex = 0;
+    let autoProxyAttempts = 0;
+    const MAX_AUTO_PROXY_ATTEMPTS = PROXY_SERVICES.length;
 
     const favorites = [
         { name: '百度', url: 'https://www.baidu.com', color: '#2932E1', icon: '百' },
@@ -107,6 +111,7 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
 
     function navigateTo(url) {
         clearAllTimers();
+        autoProxyAttempts = 0;
         if (!url) {
             currentUrl = '';
             history = [''];
@@ -142,7 +147,8 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
                     return 'loading';
                 }
             } catch (locErr) {
-                return 'ok';
+                // Cross-origin: iframe loaded but blocked access = X-Frame-Options
+                return 'blocked';
             }
 
             const bodyEl = doc.body;
@@ -153,7 +159,7 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
             }
             return 'ok';
         } catch (e) {
-            return 'ok';
+            return 'blocked';
         }
     }
 
@@ -270,6 +276,7 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
                 if (status === 'ok') {
                     confirmedOk = true;
                     cancelFinalCheck();
+                    autoProxyAttempts = 0;
                 }
             }
 
@@ -279,6 +286,20 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
                     if (container._fallbackShown || confirmedOk) return;
                     const status = isIframeBlocked(iframe);
                     if (status !== 'ok') {
+                        // Auto-try proxy if not already using it
+                        if (!useProxy && autoProxyAttempts < MAX_AUTO_PROXY_ATTEMPTS) {
+                            useProxy = true;
+                            autoProxyAttempts++;
+                            render();
+                            return;
+                        }
+                        // Try next proxy service
+                        if (useProxy && autoProxyAttempts < MAX_AUTO_PROXY_ATTEMPTS) {
+                            currentProxyIndex = (currentProxyIndex + 1) % PROXY_SERVICES.length;
+                            autoProxyAttempts++;
+                            render();
+                            return;
+                        }
                         showBlockedFallback(container, currentUrl);
                     }
                 }, delay);
@@ -292,11 +313,23 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
             });
 
             iframe.addEventListener('error', () => {
+                if (!useProxy && autoProxyAttempts < MAX_AUTO_PROXY_ATTEMPTS) {
+                    useProxy = true;
+                    autoProxyAttempts++;
+                    render();
+                    return;
+                }
                 showBlockedFallback(container, currentUrl);
             });
 
             const safetyTimer = setTimeout(() => {
                 if (container._fallbackShown || confirmedOk) return;
+                if (!useProxy && autoProxyAttempts < MAX_AUTO_PROXY_ATTEMPTS) {
+                    useProxy = true;
+                    autoProxyAttempts++;
+                    render();
+                    return;
+                }
                 showBlockedFallback(container, currentUrl);
             }, 20000);
             checkTimers.push(safetyTimer);
