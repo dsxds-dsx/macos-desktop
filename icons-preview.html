@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>macOS 26 Tahoe 图标预览</title>
+<style>
+body {
+    background: linear-gradient(135deg, #4a90e2 0%, #9b59b6 50%, #e67e22 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 40px 20px;
+    font-family: -apple-system, sans-serif;
+}
+h1 {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 30px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+.icon-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.icon-cell svg {
+    width: 100px;
+    height: 100px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+}
+.icon-name {
+    color: white;
+    font-size: 12px;
+    text-align: center;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+</style>
+</head>
+<body>
+<h1>macOS 26 Tahoe 图标预览</h1>
+<div class="grid" id="grid"></div>
+<script src="/js/system/IconGenerator.js"></script>
+<script>
+const icons = [
+    'clock', 'finder', 'photos', 'voice',
+    'calculator', 'messages', 'tips', 'appstore',
+    'siri', 'camera', 'colorpics', 'chess',
+    'garageband', 'pages', 'terminal', 'pixelmator',
+    'warnings', 'stocks', 'stickies', 'printer',
+    'chat', 'appstore2', 'books', 'contacts',
+    'addressbook', 'folders', 'bluetooth', 'keychain',
+    'reminders', 'notes', 'facetime', 'calendar',
+    'activity', 'photos2', 'chat2', 'files',
+    'siri2', 'music', 'weather', 'calculator2',
+    'findmy', 'settings', 'accessibility', 'contacts2',
+    'testflight', 'health', 'memos', 'home',
+    'terminalCmd', 'photos3', 'infinity', 'photos4',
+    'safari', 'podcasts', 'maps', 'spotlight',
+    'keys', 'appletv', 'wifi', 'mail',
+    'notes2', 'shortcuts'
+];
+const grid = document.getElementById('grid');
+icons.forEach(name => {
+    const cell = document.createElement('div');
+    cell.className = 'icon-cell';
+    const svg = IconGenerator.generate(name);
+    cell.innerHTML = svg + `<div class="icon-name">${name}</div>`;
+    grid.appendChild(cell);
+});
+</script>
+</body>
+</html>
