@@ -1,25 +1,33 @@
 /**
  * macOS 图标生成器
- * 优先使用真实 PNG 图标，SVG 作为后备。
+ * 优先加载真实 macOS 26 Tahoe 图标 PNG（CDN），加载失败回退到内置 SVG。
  */
 class IconGenerator {
     static _seq = 0;
 
-    // 拥有真实 PNG 文件的图标列表 (macOS 26 Tahoe 官方风格)
-    static _pngIcons = new Set([
-        'finder', 'safari', 'mail', 'messages', 'maps', 'photos', 'music',
-        'notes', 'calendar', 'reminders', 'facetime', 'appstore', 'settings',
-        'calculator', 'weather', 'clock', 'contacts', 'voice', 'siri',
-        'findmy', 'home', 'books', 'preview', 'stocks', 'dictionary',
-        'tv', 'photobooth', 'freeform', 'news', 'podcasts', 'terminal',
-        'stickies', 'chess', 'fontbook', 'imagecapture', 'migration',
-        'sysinfo', 'activity', 'keychain', 'textedit', 'quicktime',
-        'shortcuts', 'tips', 'timemachine', 'gamecenter', 'missioncontrol',
-        'automator', 'passwords', 'journal', 'testflight', 'phone',
-        'iphonemirror'
-    ]);
+    // 真实图标 CDN（zagnut531/macOS-26-Icons，经 jsdelivr 分发）
+    static _cdnBase = 'https://cdn.jsdelivr.net/gh/zagnut531/macOS-26-Icons@main/';
 
-    // 名称兼容映射: 应用内部别名 → PNG 文件名
+    // 内部名 → CDN 文件名（已 URL 编码）。未列出的图标直接用 SVG。
+    static _cdnMap = {
+        finder: 'Finder', safari: 'Safari', mail: 'Mail', messages: 'Messages',
+        maps: 'Maps', photos: 'Photos', music: 'Music', notes: 'Notes',
+        calendar: 'Calendar', reminders: 'Reminders', facetime: 'FaceTime',
+        appstore: 'App%20Store', settings: 'System%20Settings', calculator: 'Calculator',
+        weather: 'Weather', clock: 'Clock', contacts: 'Contacts', voice: 'Voice%20Memos',
+        siri: 'Siri', findmy: 'Find%20My', home: 'Home', books: 'Books',
+        preview: 'Preview', stocks: 'Stocks', dictionary: 'Dictionary', tv: 'TV',
+        photobooth: 'Photo%20Booth', freeform: 'Freeform', news: 'News', podcasts: 'Podcasts',
+        stickies: 'Stickies', chess: 'Chess', fontbook: 'Font%20Book',
+        imagecapture: 'Image%20Capture', textedit: 'TextEdit', quicktime: 'QuickTime%20Player',
+        shortcuts: 'Shortcuts', tips: 'Tips', timemachine: 'Time%20Machine',
+        gamecenter: 'Game%20Center', missioncontrol: 'Mission%20Control', automator: 'Automator',
+        passwords: 'Passwords', journal: 'Journal', testflight: 'TestFlight',
+        phone: 'Phone', iphonemirror: 'iPhone%20Mirroring'
+        // terminal/migration/sysinfo/activity/keychain 仓库无对应文件，直接走 SVG
+    };
+
+    // 名称兼容映射: 应用内部别名 → 标准名
     static _compatMap = {
         'voicememos': 'voice',
         'systemsettings': 'settings',
@@ -37,9 +45,28 @@ class IconGenerator {
             return IconGenerator.wrap(emoji, bgColor);
         }
         const resolved = (IconGenerator._compatMap && IconGenerator._compatMap[name]) || name;
+        const cdnName = IconGenerator._cdnMap[resolved];
+        if (cdnName) {
+            const style = size
+                ? `width:${size}px;height:${size}px;object-fit:contain;border-radius:22%;`
+                : `width:100%;height:100%;object-fit:contain;border-radius:22%;`;
+            const url = IconGenerator._cdnBase + cdnName + '.png';
+            return `<img src="${url}" alt="${resolved}" style="${style}" data-icon="${resolved}" onerror="IconGenerator._fallbackToSvg(this)">`;
+        }
         const p = IconGenerator._prefix();
         const icon = IconGenerator.icons[resolved] || IconGenerator.icons.default;
         return icon(p);
+    }
+
+    // CDN 图标加载失败时，替换为内置 SVG（避免内联模板字符串转义问题）
+    static _fallbackToSvg(imgEl) {
+        const name = imgEl.getAttribute('data-icon') || 'default';
+        const resolved = (IconGenerator._compatMap && IconGenerator._compatMap[name]) || name;
+        const p = IconGenerator._prefix();
+        const icon = IconGenerator.icons[resolved] || IconGenerator.icons.default;
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = icon(p);
+        if (wrapper.firstChild) imgEl.replaceWith(wrapper.firstChild);
     }
 
     static wrap(emoji, bgColor) {
