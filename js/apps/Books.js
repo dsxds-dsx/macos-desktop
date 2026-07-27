@@ -396,7 +396,7 @@ window.renderBooks = function(body, sidebar, toolbar, windowId) {
 
         const chapter = content.chapters[currentChapter];
         const paragraphs = chapter.content.split('\n\n');
-        const totalPages = Math.ceil(paragraphs.length / 3);
+        const totalPages = Math.max(1, Math.ceil(paragraphs.length / 3));
         const pageParaStart = currentPage * 3;
         const pageParas = paragraphs.slice(pageParaStart, pageParaStart + 3);
 
@@ -465,7 +465,7 @@ window.renderBooks = function(body, sidebar, toolbar, windowId) {
 
         document.getElementById('next-chapter').addEventListener('click', () => {
             const chapterParas = chapter.content.split('\n\n');
-            const chPages = Math.ceil(chapterParas.length / 3);
+            const chPages = Math.max(1, Math.ceil(chapterParas.length / 3));
             if (currentPage < chPages - 1) {
                 currentPage++;
             } else if (currentChapter < content.chapters.length - 1) {

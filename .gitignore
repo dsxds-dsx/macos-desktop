@@ -19,3 +19,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Verification screenshots
+verify-*.png
+diag-*.png
+icons-*.png
+icons-montage.png
+desktop-shot.png
+icons-preview.html
+icons-preview-shot.png

@@ -41,7 +41,9 @@ class IconGenerator {
             const style = size
                 ? `width:${size}px;height:${size}px;object-fit:contain;border-radius:22%;`
                 : `width:100%;height:100%;object-fit:contain;border-radius:22%;`;
-            return `<img src="icons/real/${resolved}.png" alt="${resolved}" style="${style}" loading="lazy">`;
+            const p = IconGenerator._prefix();
+            const svg = IconGenerator.icons[resolved] ? IconGenerator.icons[resolved](p) : '';
+            return `<img src="icons/real/${resolved}.png" alt="${resolved}" style="${style}" onerror="this.outerHTML=\`${svg.replace(/`/g, '\\`').replace(/\$/g, '\\$')}\`">`;
         }
         const p = IconGenerator._prefix();
         const icon = IconGenerator.icons[resolved] || IconGenerator.icons.default;
