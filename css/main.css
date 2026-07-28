@@ -1,3 +1,13 @@
+/* macOS 风格光标 */
+:root {
+    --cursor-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5 3L5 19L9.5 14.5L12.5 21L15 20L12 13.5L18 13.5Z' fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, default;
+    --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M10 3C8.5 3 8 4.5 8 6V12L6.5 11C5.5 10 4 10 3 11L2 12L6 17.5C7 19.5 9 21 11 21H14.5C17.5 21 19.5 19 19.5 16V13.5C19.5 12 18.5 10.5 17 10.5C17 9 16 7.5 14.5 7.5H13.5V6C13.5 4.5 12.5 3 11 3H10Z' fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 6 4, pointer;
+}
+
+body {
+    cursor: var(--cursor-arrow);
+}
+
 .boot-screen {
     position: fixed;
     inset: 0;
@@ -139,7 +149,7 @@
     background: var(--accent-blue);
     color: #fff;
     font-size: 20px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -183,7 +193,7 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     color: #fff;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -228,7 +238,7 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     padding: 8px;
     border-radius: 8px;
     transition: background 0.15s;
@@ -296,7 +306,7 @@
 .menubar-item {
     padding: 4px 12px;
     border-radius: 4px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -356,7 +366,7 @@
     padding: 6px 12px;
     font-size: 14px;
     border-radius: 4px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -412,7 +422,7 @@
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     transform-origin: bottom center;
     will-change: transform;
@@ -523,7 +533,7 @@
     padding: 6px 12px;
     font-size: 14px;
     border-radius: 4px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .dock-context-item:hover {
@@ -615,7 +625,7 @@
     border: none;
     background: transparent;
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 11px;
     font-weight: 500;
     transition: all 0.15s ease;
@@ -663,7 +673,7 @@
     appearance: none;
     -webkit-appearance: none;
     outline: none;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 [data-theme="light"] .cc-slider input[type="range"] {
@@ -677,7 +687,7 @@
     height: 18px;
     border-radius: 50%;
     background: #fff;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 }
 
@@ -692,7 +702,7 @@
     border: none;
     background: rgba(255,255,255,0.08);
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 11px;
     font-weight: 500;
     transition: all 0.15s ease;
@@ -748,7 +758,7 @@
     border: none;
     background: transparent;
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -909,7 +919,7 @@
     gap: 12px;
     margin-bottom: 10px;
     transition: background 0.15s ease;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .nc-notification-item:hover {
@@ -1022,7 +1032,7 @@
     align-items: center;
     gap: 12px;
     padding: 8px 10px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-radius: 6px;
     margin: 0 2px;
 }
@@ -1085,7 +1095,7 @@
     padding: 6px 12px;
     font-size: 14px;
     border-radius: 4px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .context-menu-item:hover {
@@ -1393,7 +1403,7 @@
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.15s ease;
     width: 100%;
     max-width: 90px;
@@ -1449,7 +1459,7 @@
     height: 6px;
     border-radius: 50%;
     background: rgba(255,255,255,0.3);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.2s ease;
 }
 
@@ -1503,7 +1513,7 @@
     padding: 10px;
     border-radius: 12px;
     transition: all 0.15s ease;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .app-switcher-item.selected {

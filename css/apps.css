@@ -92,7 +92,7 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     padding: 12px;
     border-radius: 12px;
     transition: background 0.15s;
@@ -135,7 +135,7 @@
 .note-item {
     padding: 10px 12px;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     margin-bottom: 2px;
 }
 
@@ -261,7 +261,7 @@
     border: none;
     background: var(--button-bg);
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -305,7 +305,7 @@
 .calendar-day {
     padding: 8px;
     font-size: 14px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-radius: 6px;
     position: relative;
 }
@@ -339,7 +339,7 @@
     aspect-ratio: 1;
     border-radius: 4px;
     overflow: hidden;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     position: relative;
 }
 
@@ -413,7 +413,7 @@
     border-radius: 13px;
     background: rgba(128,128,128,0.3);
     position: relative;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: background 0.2s;
 }
 
@@ -448,7 +448,7 @@
 .wallpaper-item {
     aspect-ratio: 16/10;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border: 3px solid transparent;
     overflow: hidden;
     transition: transform 0.2s;
@@ -492,7 +492,7 @@
 .mail-item {
     padding: 12px;
     border-bottom: 0.5px solid var(--border-color);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .mail-item:hover {
@@ -651,7 +651,7 @@
     border-radius: 50%;
     border: none;
     font-size: 24px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: filter 0.1s;
 }
 
@@ -750,7 +750,7 @@
     border: none;
     background: transparent;
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -817,7 +817,7 @@
     background: transparent;
     color: var(--text-primary);
     font-size: 13px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-family: var(--system-font);
 }
 
@@ -950,7 +950,7 @@
     gap: 12px;
     padding: 10px 12px;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .reminder-item:hover {
@@ -962,7 +962,7 @@
     height: 20px;
     border-radius: 50%;
     border: 2px solid var(--accent-red);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -1012,7 +1012,7 @@
 
 .contact-item {
     padding: 10px 16px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1110,7 +1110,7 @@
 }
 
 .app-card {
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .app-card-icon {
@@ -1172,7 +1172,7 @@
     align-items: center;
     justify-content: center;
     font-size: 32px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .chess-square.light {
@@ -1328,7 +1328,7 @@
 .maps-locate-btn {
     border: none;
     background: transparent;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     color: var(--accent-blue, #007aff);
     padding: 4px;
     border-radius: 6px;
@@ -1363,7 +1363,7 @@
     align-items: flex-start;
     gap: 10px;
     padding: 10px 12px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
@@ -1411,7 +1411,7 @@
     padding: 4px 12px;
     font-size: 12px;
     font-family: var(--system-font, -apple-system, BlinkMacSystemFont, sans-serif);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -1474,7 +1474,7 @@
     font-size: 13px;
     font-family: var(--system-font, -apple-system, BlinkMacSystemFont, sans-serif);
     font-weight: 500;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     white-space: nowrap;
 }
 
@@ -1501,7 +1501,7 @@
 .maps-dir-close {
     border: none;
     background: transparent;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 14px;
     color: #999;
     padding: 2px 6px;
@@ -1575,7 +1575,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -1646,7 +1646,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .maps-nav-exit:hover {
@@ -1710,7 +1710,7 @@
     border-radius: 12px;
     font-size: 15px;
     font-weight: 600;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-family: inherit;
     min-width: 100px;
 }
@@ -1762,7 +1762,7 @@
     gap: 12px;
     padding: 12px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     margin-bottom: 8px;
 }
 
@@ -1797,7 +1797,7 @@
     border-radius: 50%;
     border: 4px solid var(--accent-red);
     background: var(--accent-red);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.2s;
 }
 
@@ -1858,7 +1858,7 @@
     border: none;
     background: rgba(255,255,255,0.2);
     color: #fff;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1920,7 +1920,7 @@
     height: 64px;
     border-radius: 50%;
     border: none;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1986,7 +1986,7 @@
 }
 
 .finder-path-item {
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .finder-path-item:hover {
@@ -2030,7 +2030,7 @@
     gap: 8px;
     padding: 6px 12px;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
 }
 
@@ -2088,7 +2088,7 @@
     border: none;
     background: transparent;
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2111,7 +2111,7 @@
     border: none;
     background: transparent;
     color: var(--text-secondary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -2206,7 +2206,7 @@
     gap: 8px;
     padding: 14px 8px;
     border-radius: 14px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.15s, background 0.15s;
 }
 
@@ -2265,7 +2265,7 @@
     height: 8px;
     border-radius: 50%;
     background: rgba(255,255,255,0.3);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: background 0.15s;
 }
 
@@ -2294,7 +2294,7 @@
     gap: 6px;
     padding: 8px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .finder-grid-item:hover {
@@ -2339,7 +2339,7 @@
     display: grid;
     grid-template-columns: 2fr 1fr 100px 100px;
     padding: 6px 16px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     align-items: center;
 }
 
@@ -2385,7 +2385,7 @@
     gap: 10px;
     padding: 8px 12px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     margin-bottom: 2px;
 }
@@ -2437,7 +2437,7 @@
     border-radius: 50%;
     background: #fff;
     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .safari-nav-btn {
@@ -2446,7 +2446,7 @@
     border: none;
     background: transparent;
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -2513,7 +2513,7 @@
     padding: 8px 16px;
     border-radius: 6px;
     border: 2px solid transparent;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -2623,7 +2623,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 20px;
     color: white;
 }
@@ -2679,7 +2679,7 @@
     padding: 8px;
     text-align: center;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
     transition: background 0.15s;
 }
@@ -2711,7 +2711,7 @@
     gap: 10px;
     padding: 10px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     margin-bottom: 2px;
 }
 
@@ -2810,7 +2810,7 @@
     border-radius: 8px;
     background: #007AFF;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
     display: flex;
     align-items: center;
@@ -2857,7 +2857,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 16px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     transition: background 0.15s;
 }
@@ -2911,7 +2911,7 @@
     border-radius: 16px;
     padding: 14px;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     position: relative;
     transition: transform 0.15s, box-shadow 0.15s;
     display: flex;
@@ -3001,7 +3001,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 16px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-bottom: 1px solid rgba(0,0,0,0.04);
 }
 
@@ -3116,7 +3116,7 @@
     border: none;
     border-radius: 6px;
     background: rgba(0,0,0,0.06);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 11px;
     flex-shrink: 0;
     margin-left: 10px;
@@ -3164,7 +3164,7 @@
     border-radius: 6px;
     background: #007AFF;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 18px;
     display: flex;
     align-items: center;
@@ -3183,7 +3183,7 @@
     gap: 10px;
     padding: 10px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     margin-bottom: 2px;
 }
 
@@ -3238,7 +3238,7 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 14px;
     transition: background 0.15s;
 }
@@ -3382,7 +3382,7 @@
 .pb-filter {
     flex-shrink: 0;
     text-align: center;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     padding: 6px;
     border-radius: 8px;
     transition: background 0.15s;
@@ -3427,7 +3427,7 @@
     border-radius: 8px;
     background: #333;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -3437,7 +3437,7 @@
     border-radius: 50%;
     background: white;
     border: 4px solid #333;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3462,7 +3462,7 @@
     border-radius: 50%;
     background: #333;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 18px;
 }
 
@@ -3497,7 +3497,7 @@
 }
 
 .pb-thumb {
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.15s;
 }
 
@@ -3571,7 +3571,7 @@
 
 .gc-tab {
     padding: 12px 20px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     transition: background 0.15s;
 }
@@ -3664,7 +3664,7 @@
     border-radius: 8px;
     background: #f093fb;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
     font-weight: 600;
 }
@@ -3716,7 +3716,7 @@
     border-radius: 6px;
     background: #f093fb;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 11px;
 }
 
@@ -3854,7 +3854,7 @@
 }
 
 .mc-desktop {
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.2s;
 }
 
@@ -4018,7 +4018,7 @@
     gap: 10px;
     padding: 8px 8px;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -4057,7 +4057,7 @@
     border-radius: 6px;
     background: #007AFF;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -4083,7 +4083,7 @@
 .automator-tab {
     padding: 6px 14px;
     border-radius: 6px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -4098,7 +4098,7 @@
     border-radius: 6px;
     background: #34C759;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
     font-weight: 600;
 }
@@ -4119,7 +4119,7 @@
     padding: 12px;
     background: white;
     border-radius: 10px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.15s, box-shadow 0.15s;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
@@ -4273,7 +4273,7 @@
     gap: 10px;
     padding: 8px 10px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -4309,7 +4309,7 @@
     padding: 10px;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     font-weight: 500;
 }
@@ -4356,7 +4356,7 @@
     border-radius: 8px;
     background: #FF9500;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     font-weight: 500;
 }
@@ -4372,7 +4372,7 @@
     border: none;
     border-radius: 6px;
     background: transparent;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 11px;
     color: #8E8E93;
 }
@@ -4391,7 +4391,7 @@
 .journal-entry-item {
     padding: 12px;
     border-radius: 10px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     margin-bottom: 4px;
     transition: background 0.15s;
 }
@@ -4498,7 +4498,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: transform 0.15s;
 }
 
@@ -4519,7 +4519,7 @@
     border: none;
     border-radius: 8px;
     background: rgba(0,0,0,0.06);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
 }
 
@@ -4581,7 +4581,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 20px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     transition: background 0.15s;
 }
@@ -4699,7 +4699,7 @@
     border-radius: 20px;
     background: #00b4d8;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 12px;
     font-weight: 600;
 }
@@ -4775,7 +4775,7 @@
     gap: 10px;
     padding: 9px 10px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
 }
 
@@ -4828,7 +4828,7 @@
     padding: 18px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     transition: transform 0.15s, box-shadow 0.15s;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .tip-card:hover {
@@ -4871,7 +4871,7 @@
 .tip-like {
     background: none;
     border: none;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 16px;
 }
 
@@ -4895,7 +4895,7 @@
 
 .phone-tab {
     padding: 12px 16px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     display: flex;
     align-items: center;
@@ -4932,7 +4932,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 20px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-bottom: 1px solid rgba(0,0,0,0.04);
 }
 
@@ -4991,7 +4991,7 @@
     border-radius: 50%;
     background: #34C759;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 14px;
 }
 
@@ -5056,7 +5056,7 @@
     border-radius: 50%;
     background: rgba(255,255,255,0.15);
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 22px;
     display: flex;
     flex-direction: column;
@@ -5073,7 +5073,7 @@
     border-radius: 50%;
     background: #FF3B30;
     color: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 28px;
     display: flex;
     align-items: center;
@@ -5113,7 +5113,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: background 0.15s;
     user-select: none;
 }
@@ -5311,7 +5311,7 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .im-app-icon-img {
@@ -5403,7 +5403,7 @@
     border: none;
     border-radius: 8px;
     background: white;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     text-align: left;
     display: flex;
@@ -5453,7 +5453,7 @@
 .appstore-cat-item {
     padding: 8px 10px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     color: var(--text-secondary);
     transition: all 0.15s ease;
@@ -5597,7 +5597,7 @@
     border-radius: 20px;
     font-size: 13px;
     font-weight: 600;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.15s ease;
     flex-shrink: 0;
 }
@@ -5632,7 +5632,7 @@
     background: var(--bg-secondary);
     border-radius: 14px;
     border: 1px solid var(--border-color);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.2s ease;
 }
 
@@ -5817,7 +5817,7 @@
     border-radius: 14px;
     border: 1px solid var(--border-color);
     transition: all 0.2s ease;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .generic-feature-card:hover {
@@ -5856,7 +5856,7 @@
     border-radius: 8px;
     font-size: 13px;
     font-weight: 500;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.15s ease;
 }
 
@@ -5906,7 +5906,7 @@
     padding: 5px 14px;
     border-radius: 6px;
     font-size: 13px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.15s ease;
 }
 
@@ -5947,7 +5947,7 @@
     height: 28px;
     border-radius: 6px;
     font-size: 12px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.15s ease;
 }
 
@@ -5993,7 +5993,7 @@
     border: none;
     border-radius: 8px;
     font-size: 13px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.15s ease;
     flex-shrink: 0;
 }
@@ -6048,7 +6048,7 @@
     background: none;
     border: none;
     color: var(--accent-blue);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 14px;
     margin-bottom: 24px;
     padding: 0;
@@ -6127,7 +6127,7 @@
     border: none;
     border-radius: 8px;
     font-size: 14px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-weight: 500;
     transition: background 0.15s ease;
 }
@@ -6154,7 +6154,7 @@
     padding: 8px 4px;
     font-size: 13px;
     color: var(--text-primary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     border-radius: 4px;
     transition: all 0.15s ease;
 }
@@ -6203,7 +6203,7 @@
 }
 
 .books-card {
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
 }
 
 .books-cover {

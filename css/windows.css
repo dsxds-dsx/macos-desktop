@@ -105,7 +105,7 @@
     height: var(--control-size);
     border-radius: 50%;
     border: none;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -174,7 +174,7 @@
     border: none;
     background: transparent;
     color: var(--text-secondary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -256,7 +256,7 @@
     margin: 0 8px;
     border-radius: 6px;
     font-size: 13px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: background 0.1s;
     color: var(--text-primary);
 }
@@ -359,7 +359,7 @@
     border: none;
     font-size: 13px;
     font-weight: 500;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: all 0.1s;
     font-family: var(--system-font);
 }
@@ -413,7 +413,7 @@
     align-items: center;
     padding: 6px 12px;
     gap: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     font-size: 13px;
     border-radius: 4px;
     margin: 2px 8px;
@@ -474,7 +474,7 @@
     gap: 4px;
     padding: 8px;
     border-radius: 8px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     transition: background 0.1s;
 }
 
@@ -548,7 +548,7 @@
     padding: 6px 16px;
     border-radius: 8px 8px 0 0;
     font-size: 12px;
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     background: transparent;
     border: none;
     color: var(--text-tertiary);
@@ -568,7 +568,7 @@
     border: none;
     background: transparent;
     color: var(--text-tertiary);
-    cursor: pointer;
+    cursor: var(--cursor-pointer);
     display: flex;
     align-items: center;
     justify-content: center;

@@ -403,6 +403,7 @@ class AppManager {
             dockItem.classList.add('bounce');
             setTimeout(() => {
                 dockItem.classList.remove('bounce');
+                dockItem.style.transform = '';
             }, 600);
         }
     }
