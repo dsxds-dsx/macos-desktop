@@ -39,6 +39,16 @@ class WindowManager {
         win.style.top = `${y}px`;
         win.style.zIndex = ++this.zIndexCounter;
 
+        // 从 Dock 弹起的 origin
+        const dockItem = document.querySelector(`.dock-item[data-app-id="${appName}"]`);
+        if (dockItem) {
+            const dockRect = dockItem.getBoundingClientRect();
+            const winRect = { left: x, top: y, width, height };
+            const originX = ((dockRect.left + dockRect.width / 2) - winRect.left) / winRect.width * 100;
+            const originY = ((dockRect.top + dockRect.height / 2) - winRect.top) / winRect.height * 100;
+            win.style.transformOrigin = `${Math.max(0, Math.min(100, originX))}% ${Math.max(0, Math.min(100, originY))}%`;
+        }
+
         win.innerHTML = `
             <div class="window-header">
                 <div class="window-controls">
@@ -176,6 +186,7 @@ class WindowManager {
             startY = e.clientY;
             startL = win.offsetLeft;
             startT = win.offsetTop;
+            win.classList.add('dragging');
             document.addEventListener('mousemove', onDragMove);
             document.addEventListener('mouseup', onDragUp);
         });
@@ -203,6 +214,7 @@ class WindowManager {
 
         const onDragUp = () => {
             isDragging = false;
+            win.classList.remove('dragging');
             document.removeEventListener('mousemove', onDragMove);
             document.removeEventListener('mouseup', onDragUp);
         };

@@ -696,16 +696,29 @@ function setupContextMenu() {
 function showContextMenu(x, y) {
     const menu = document.getElementById('context-menu');
     menu.innerHTML = `
-        <div class="context-menu-item" data-action="new-folder">新建文件夹</div>
+        <div class="context-menu-item" data-action="new-folder">新建文件夹<span class="ctx-shortcut">⇧⌘N</span></div>
         <div class="context-menu-separator"></div>
-        <div class="context-menu-item" data-action="change-wallpaper">更改桌面背景...</div>
+        <div class="context-menu-item" data-action="get-info">显示简介</div>
+        <div class="context-menu-item" data-action="change-wallpaper">更改桌面背景…</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" data-action="sort-by-name">按名称排序</div>
+        <div class="context-menu-item" data-action="sort-by-date">按修改日期排序</div>
+        <div class="context-menu-item" data-action="sort-by-kind">按种类排序</div>
+        <div class="context-menu-separator"></div>
         <div class="context-menu-item" data-action="show-view-options">查看显示选项</div>
     `;
-    
-    menu.style.left = `${x}px`;
-    menu.style.top = `${y}px`;
+
+    // 防止超出屏幕
+    menu.style.left = '0px';
+    menu.style.top = '0px';
     menu.classList.add('show');
-    
+    const rect = menu.getBoundingClientRect();
+    let mx = x, my = y;
+    if (mx + rect.width > window.innerWidth - 8) mx = window.innerWidth - rect.width - 8;
+    if (my + rect.height > window.innerHeight - 8) my = window.innerHeight - rect.height - 8;
+    menu.style.left = `${mx}px`;
+    menu.style.top = `${my}px`;
+
     menu.querySelectorAll('.context-menu-item').forEach(item => {
         item.addEventListener('click', () => {
             const action = item.dataset.action;
@@ -715,6 +728,8 @@ function showContextMenu(x, y) {
                     const settingsSidebar = document.querySelector('.settings-sidebar-item[data-tab="appearance"]');
                     settingsSidebar?.click();
                 }, 300);
+            } else if (action === 'new-folder' && fileSystem) {
+                fileSystem.createFolder(`~/Desktop/新建文件夹 ${new Date().getTime().toString().slice(-4)}`);
             }
             menu.classList.remove('show');
         });

@@ -85,13 +85,22 @@ window.renderLaunchpad = function(body, sidebar, toolbar, windowId) {
             item.addEventListener('click', () => {
                 const appId = item.dataset.appId;
                 if (window.appManager && appId) {
-                    // 关闭 Launchpad 窗口
+                    // 关闭 Launchpad 窗口（带缩小动画）
                     if (window.windowManager) {
-                        window.windowManager.closeWindow(windowId);
+                        const winEl = document.getElementById(`window-${windowId}`);
+                        if (winEl) {
+                            winEl.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                            winEl.style.transformOrigin = '50% 100%';
+                            winEl.style.transform = 'scale(0.6) translateY(40px)';
+                            winEl.style.opacity = '0';
+                            setTimeout(() => window.windowManager.closeWindow(windowId), 250);
+                        } else {
+                            window.windowManager.closeWindow(windowId);
+                        }
                     }
                     setTimeout(() => {
                         window.appManager.openApp(appId);
-                    }, 100);
+                    }, 280);
                 }
             });
         });
@@ -116,7 +125,16 @@ window.renderLaunchpad = function(body, sidebar, toolbar, windowId) {
                 render();
             } else if (e.key === 'Escape') {
                 if (window.windowManager) {
-                    window.windowManager.closeWindow(windowId);
+                    const winEl = document.getElementById(`window-${windowId}`);
+                    if (winEl) {
+                        winEl.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                        winEl.style.transformOrigin = '50% 100%';
+                        winEl.style.transform = 'scale(0.6) translateY(40px)';
+                        winEl.style.opacity = '0';
+                        setTimeout(() => window.windowManager.closeWindow(windowId), 250);
+                    } else {
+                        window.windowManager.closeWindow(windowId);
+                    }
                 }
             }
         };
