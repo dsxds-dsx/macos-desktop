@@ -600,11 +600,11 @@ class AppManager {
     }
 
     hasToolbar(appId) {
-        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies', 'photos', 'calendar', 'weather', 'stocks', 'news', 'tv'].includes(appId);
+        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies', 'photos', 'calendar', 'weather', 'stocks', 'news', 'tv', 'contacts'].includes(appId);
     }
 
     hasSidebar(appId) {
-        return ['finder', 'notes', 'mail', 'messages', 'settings', 'music', 'contacts', 'ai', 'reminders', 'textedit', 'photos', 'calendar', 'weather', 'stocks', 'podcasts'].includes(appId);
+        return ['finder', 'notes', 'mail', 'messages', 'settings', 'music', 'contacts', 'ai', 'reminders', 'textedit', 'photos', 'calendar', 'weather', 'stocks', 'podcasts', 'maps', 'news'].includes(appId);
     }
 
     renderApp(windowId, appId) {
