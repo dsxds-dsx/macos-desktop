@@ -9159,14 +9159,16 @@
 
 .freeform-sidebar {
     width: 240px;
-    border-right: 1px solid rgba(0,0,0,0.08);
-    background: rgba(0,0,0,0.02);
+    border-right: 0.5px solid var(--border-color);
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     display: flex;
     flex-direction: column;
 }
 
 .freeform-sidebar-header {
-    padding: 14px 16px;
+    padding: 14px 16px 6px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -9175,125 +9177,211 @@
 .freeform-title {
     font-size: 17px;
     font-weight: 700;
+    color: var(--text-primary);
+}
+
+.freeform-sidebar-subtitle {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 16px 6px;
 }
 
 .freeform-new-btn {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border: none;
     border-radius: 6px;
-    background: #007AFF;
+    background: var(--accent);
     color: white;
     cursor: var(--cursor-pointer);
-    font-size: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: filter 0.15s, transform 0.1s;
 }
+
+.freeform-new-btn:hover { filter: brightness(1.08); }
+.freeform-new-btn:active { transform: scale(0.92); }
 
 .freeform-board-list {
     flex: 1;
     overflow-y: auto;
-    padding: 8px;
+    padding: 4px 8px;
 }
 
 .freeform-board-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px;
+    padding: 8px 8px;
     border-radius: 8px;
     cursor: var(--cursor-pointer);
     margin-bottom: 2px;
+    position: relative;
+    transition: background 0.12s;
 }
 
 .freeform-board-item:hover {
-    background: rgba(0,0,0,0.04);
+    background: var(--button-hover);
 }
 
 .freeform-board-item.active {
-    background: #007AFF;
+    background: var(--accent);
     color: white;
 }
 
+.freeform-board-item.active .freeform-board-count { color: rgba(255,255,255,0.75); }
+.freeform-board-item.active .freeform-board-del { opacity: 0.8; }
+.freeform-board-item.active .freeform-board-del:hover { background: rgba(255,255,255,0.2); }
+
 .freeform-board-icon {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 16px;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+}
+
+.freeform-board-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .freeform-board-name {
     font-size: 13px;
     font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .freeform-board-count {
     font-size: 11px;
-    color: #8E8E93;
-    opacity: 0.8;
+    color: var(--text-secondary);
 }
+
+.freeform-board-del {
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 5px;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: var(--cursor-pointer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+}
+
+.freeform-board-item:hover .freeform-board-del { opacity: 0.6; }
+.freeform-board-del:hover { opacity: 1 !important; background: var(--button-hover); }
 
 .freeform-main {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .freeform-toolbar {
-    padding: 10px 16px;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 8px 14px;
+    border-bottom: 0.5px solid var(--border-color);
+    background: var(--bg-elevated);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.ff-tool-group {
+    display: flex;
+    gap: 2px;
+    background: var(--button-bg);
+    border-radius: 8px;
+    padding: 2px;
 }
 
 .ff-tool {
-    width: 32px;
-    height: 32px;
+    width: 30px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 6px;
     cursor: var(--cursor-pointer);
-    font-size: 14px;
-    transition: background 0.15s;
+    color: var(--text-primary);
+    transition: background 0.12s, color 0.12s;
 }
 
 .ff-tool:hover {
-    background: rgba(0,0,0,0.06);
+    background: var(--button-hover);
 }
 
 .ff-tool.active {
-    background: #007AFF;
+    background: var(--accent);
     color: white;
+}
+
+.ff-tool.ff-sm {
+    width: 26px;
+    height: 26px;
 }
 
 .ff-tool-sep {
     width: 1px;
     height: 20px;
-    background: rgba(0,0,0,0.1);
-    margin: 0 4px;
+    background: var(--border-color);
+    margin: 0 6px;
 }
 
-.ff-tool-share {
+.ff-tool-right {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ff-zoom-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    min-width: 38px;
+    text-align: center;
 }
 
 .freeform-board-title {
     font-size: 14px;
     font-weight: 600;
-    margin-left: 10px;
+    margin-left: 12px;
+    color: var(--text-primary);
+}
+
+.freeform-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
 }
 
 .freeform-canvas {
     flex: 1;
     overflow: auto;
     position: relative;
-    background: #f5f5f7;
+    background: var(--bg-tertiary);
+    min-width: 100%;
+    min-height: 100%;
+    transform-origin: top left;
 }
 
 .freeform-grid-bg {
@@ -9303,38 +9391,103 @@
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px);
-    background-size: 20px 20px;
-    min-width: 2000px;
-    min-height: 2000px;
+        radial-gradient(circle, var(--grid-dot) 1px, transparent 1px);
+    background-size: 22px 22px;
+    min-width: 2400px;
+    min-height: 1800px;
+    pointer-events: none;
+}
+
+.freeform-hint {
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: var(--bg-elevated);
+    padding: 5px 12px;
+    border-radius: 12px;
+    border: 0.5px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    pointer-events: none;
+    white-space: nowrap;
 }
 
 .ff-sticky {
     position: absolute;
     padding: 12px;
     border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.18);
     cursor: move;
     font-size: 13px;
-    line-height: 1.4;
+    line-height: 1.45;
     user-select: none;
-    transition: box-shadow 0.2s;
+    transition: box-shadow 0.18s, outline 0.1s;
+    overflow: hidden;
 }
 
 .ff-sticky:hover {
-    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.24);
+}
+
+.ff-sticky.selected {
+    outline: 2.5px solid var(--accent);
+    outline-offset: 2px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.28);
+}
+
+.ff-sticky-text {
+    color: rgba(0,0,0,0.85);
+    font-weight: 500;
+    height: 100%;
+    overflow: hidden;
+}
+
+.ff-sticky-edit {
+    border: none;
+    background: transparent;
+    color: rgba(0,0,0,0.85);
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.45;
+    font-weight: 500;
+    resize: none;
+    outline: none;
+    padding: 0;
 }
 
 .ff-text-item {
     position: absolute;
     cursor: move;
     user-select: none;
+    color: var(--text-primary);
+    transition: outline 0.1s;
+}
+
+.ff-text-item.selected {
+    outline: 2.5px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 2px;
 }
 
 .ff-shape-item {
     position: absolute;
     cursor: move;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: outline 0.1s;
+}
+
+.ff-shape-item.selected {
+    outline: 2.5px solid var(--accent);
+    outline-offset: 3px;
 }
 
 /* Photo Booth */

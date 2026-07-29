@@ -600,7 +600,7 @@ class AppManager {
     }
 
     hasToolbar(appId) {
-        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies', 'photos', 'calendar', 'weather', 'stocks', 'news', 'tv', 'contacts', 'books', 'appstore'].includes(appId);
+        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies', 'photos', 'calendar', 'weather', 'stocks', 'news', 'tv', 'contacts', 'books', 'appstore', 'podcasts'].includes(appId);
     }
 
     hasSidebar(appId) {

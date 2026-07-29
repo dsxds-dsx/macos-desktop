@@ -40,6 +40,9 @@
     --accent-yellow: #FFD60A;
     --accent-purple: #BF5AF2;
     --accent-pink: #FF375F;
+    --accent: #0A84FF;
+    --grid-dot: rgba(255, 255, 255, 0.12);
+    --sticky-shadow: rgba(0, 0, 0, 0.45);
     --control-close: #FF5F57;
     --control-minimize: #FEBC2E;
     --control-maximize: #28C840;
@@ -76,6 +79,9 @@
     --accent-yellow: #FFCC00;
     --accent-purple: #AF52DE;
     --accent-pink: #FF2D55;
+    --accent: #007AFF;
+    --grid-dot: rgba(0, 0, 0, 0.1);
+    --sticky-shadow: rgba(0, 0, 0, 0.18);
     --control-close: #FF5F57;
     --control-minimize: #FEBC2E;
     --control-maximize: #28C840;
