@@ -62,22 +62,22 @@ function setupLockScreen() {
         const lockScreen = document.getElementById('lock-screen');
         const desktop = document.getElementById('desktop');
         const hint = document.getElementById('lock-hint');
-        
+
         hint.textContent = '';
-        lockScreen.style.opacity = '0';
-        lockScreen.style.transition = 'opacity 0.5s';
-        
+        lockScreen.classList.add('unlocking');
+        desktop.classList.remove('hidden');
+
         setTimeout(() => {
             lockScreen.classList.add('hidden');
-            desktop.classList.remove('hidden');
+            lockScreen.classList.remove('unlocking');
             passwordInput.value = '';
-            
+
             if (appManager) {
                 appManager.openApp('finder');
             }
-            
+
             resetIdleTimer();
-        }, 500);
+        }, 600);
     }
     
     submitBtn.addEventListener('click', unlock);
@@ -1306,7 +1306,8 @@ function lockScreen() {
     const desktop = document.getElementById('desktop');
     desktop?.classList.add('hidden');
     lockScreen?.classList.remove('hidden');
-    lockScreen.style.opacity = '1';
+    lockScreen?.classList.remove('unlocking');
+    lockScreen.style.opacity = '';
     updateLockClock();
 }
 
