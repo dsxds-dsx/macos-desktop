@@ -76,10 +76,15 @@ window.renderShortcuts = function(body, sidebar, toolbar, windowId) {
                 if (sc) {
                     sc.runs++;
                     card.classList.add('running');
+                    const playBtn = card.querySelector('.shortcut-card-play');
+                    if (playBtn) playBtn.textContent = '⏳';
                     setTimeout(() => {
                         card.classList.remove('running');
-                        alert(`「${sc.name}」运行完成！\n已运行 ${sc.runs} 次`);
-                    }, 800);
+                        if (playBtn) playBtn.textContent = '▶';
+                        if (window.toast) window.toast(`「${sc.name}」运行完成 · 已运行 ${sc.runs} 次`, 'success');
+                        // refresh count in sidebar
+                        const catCount = body.querySelector(`.shortcuts-category[data-cat="${sc.category}"] .shortcuts-cat-count`);
+                    }, 900);
                 }
             });
         });

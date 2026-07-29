@@ -8985,65 +8985,110 @@
 
 .passwords-sidebar {
     width: 280px;
-    border-right: 1px solid rgba(0,0,0,0.08);
+    border-right: 0.5px solid var(--border-color);
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     display: flex;
     flex-direction: column;
 }
 
 .passwords-sidebar-header {
-    padding: 16px;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 14px 14px 10px;
+}
+
+.passwords-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
 .passwords-title {
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 12px;
+    color: var(--text-primary);
 }
 
-.passwords-sidebar input {
-    width: 100%;
-    padding: 7px 12px;
+.passwords-add-btn {
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    cursor: var(--cursor-pointer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: filter 0.15s, transform 0.1s;
+}
+
+.passwords-add-btn:hover { filter: brightness(1.08); }
+.passwords-add-btn:active { transform: scale(0.92); }
+
+.passwords-search-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--input-bg);
     border-radius: 8px;
-    border: 1px solid rgba(0,0,0,0.1);
+    padding: 6px 10px;
+    color: var(--text-secondary);
+}
+
+.passwords-search-wrap input {
+    flex: 1;
+    border: none;
+    background: transparent;
     font-size: 13px;
     outline: none;
-    box-sizing: border-box;
+    color: var(--text-primary);
 }
 
 .passwords-list {
     flex: 1;
     overflow-y: auto;
+    padding: 4px 8px;
+}
+
+.passwords-empty {
+    padding: 30px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-secondary);
 }
 
 .password-item {
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 10px 16px;
+    padding: 8px 10px;
+    border-radius: 8px;
     cursor: var(--cursor-pointer);
-    border-bottom: 1px solid rgba(0,0,0,0.04);
+    margin-bottom: 1px;
+    transition: background 0.12s;
 }
 
 .password-item:hover {
-    background: rgba(0,0,0,0.03);
+    background: var(--button-hover);
 }
 
 .password-item.active {
-    background: #007AFF;
+    background: var(--accent);
     color: white;
 }
 
 .password-item-icon {
-    width: 36px;
-    height: 36px;
+    width: 34px;
+    height: 34px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 15px;
     flex-shrink: 0;
 }
 
@@ -9062,7 +9107,7 @@
 
 .password-item-user {
     font-size: 11px;
-    color: #8E8E93;
+    color: var(--text-secondary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -9072,54 +9117,119 @@
     color: rgba(255,255,255,0.7);
 }
 
+.password-item-otp {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+.password-item.active .password-item-otp { color: rgba(255,255,255,0.8); }
+
+.password-item-strength {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
 .passwords-detail {
     flex: 1;
     padding: 30px;
     overflow-y: auto;
+    background: var(--bg-elevated);
+}
+
+.password-detail-scroll {
+    max-width: 480px;
+    margin: 0 auto;
 }
 
 .password-detail-card {
     text-align: center;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
 }
 
 .password-detail-icon {
-    width: 80px;
-    height: 80px;
-    border-radius: 20px;
+    width: 76px;
+    height: 76px;
+    border-radius: 18px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .password-detail-name {
     font-size: 22px;
     font-weight: 700;
     margin-bottom: 4px;
+    color: var(--text-primary);
 }
 
 .password-detail-url {
     font-size: 14px;
-    color: #007AFF;
+    color: var(--accent);
+}
+
+.pwd-otp-card {
+    background: var(--bg-tertiary);
+    border: 0.5px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.pwd-otp-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+}
+
+.pwd-otp-code {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    color: var(--text-primary);
+    font-family: var(--mono-font);
+    margin-bottom: 10px;
+}
+
+.pwd-otp-bar {
+    height: 3px;
+    background: var(--button-bg);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+}
+
+.pwd-otp-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.3s linear;
+}
+
+.pwd-otp-remaining {
+    font-size: 11px;
+    color: var(--text-secondary);
 }
 
 .password-detail-fields {
-    max-width: 400px;
-    margin: 0 auto;
+    max-width: 100%;
 }
 
 .pwd-field {
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.08);
+    padding: 12px 0;
+    border-bottom: 0.5px solid var(--border-color);
 }
 
 .pwd-field-label {
     font-size: 12px;
-    color: #8E8E93;
+    color: var(--text-secondary);
     margin-bottom: 4px;
 }
 
@@ -9129,17 +9239,101 @@
     align-items: center;
     justify-content: space-between;
     word-break: break-all;
+    gap: 8px;
+}
+
+.pwd-field-text {
+    color: var(--text-primary);
+    font-family: var(--mono-font);
+}
+
+.pwd-field-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .pwd-copy-btn {
-    padding: 4px 10px;
+    padding: 4px 12px;
     border: none;
     border-radius: 6px;
-    background: rgba(0,0,0,0.06);
+    background: var(--button-bg);
+    color: var(--text-primary);
     cursor: var(--cursor-pointer);
     font-size: 11px;
     flex-shrink: 0;
-    margin-left: 10px;
+    transition: background 0.12s, transform 0.1s;
+}
+
+.pwd-copy-btn:hover { background: var(--button-hover); }
+.pwd-copy-btn:active { transform: scale(0.95); }
+
+.pwd-strength-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.pwd-strength-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--button-bg);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.pwd-strength-bar > span {
+    display: block;
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s;
+}
+
+.pwd-strength-text {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.password-detail-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    justify-content: center;
+}
+
+.pwd-action-btn {
+    padding: 8px 22px;
+    border: none;
+    border-radius: 8px;
+    background: var(--button-bg);
+    color: var(--text-primary);
+    cursor: var(--cursor-pointer);
+    font-size: 13px;
+    font-weight: 500;
+    transition: background 0.12s, transform 0.1s;
+}
+
+.pwd-action-btn:hover { background: var(--button-hover); }
+.pwd-action-btn:active { transform: scale(0.97); }
+.pwd-action-btn.danger { color: var(--accent-red); }
+.pwd-action-btn.danger:hover { background: rgba(255, 59, 48, 0.12); }
+
+.pwd-security-tip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding: 12px 14px;
+    background: var(--bg-tertiary);
+    border-radius: 10px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.pwd-security-tip svg {
+    color: var(--accent-green);
+    flex-shrink: 0;
 }
 
 .passwords-detail-empty {
@@ -9148,8 +9342,133 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: #8E8E93;
+    color: var(--text-secondary);
 }
+
+.passwords-empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 16px;
+    color: var(--text-primary);
+}
+
+.passwords-empty-sub {
+    font-size: 13px;
+    margin-top: 6px;
+    text-align: center;
+    max-width: 260px;
+}
+
+.pwd-form {
+    max-width: 440px;
+    margin: 20px auto 0;
+}
+
+.pwd-form-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.pwd-form-row {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.pwd-form-row label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.pwd-form-row input {
+    padding: 8px 12px;
+    border: 0.5px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--input-bg);
+    font-size: 14px;
+    color: var(--text-primary);
+    outline: none;
+    font-family: var(--mono-font);
+}
+
+.pwd-form-row input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(10, 132, 255, 0.2);
+}
+
+.pwd-toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 26px;
+    cursor: var(--cursor-pointer);
+}
+
+.pwd-toggle-switch input { opacity: 0; width: 0; height: 0; }
+
+.pwd-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--button-bg);
+    border-radius: 13px;
+    transition: background 0.2s;
+}
+
+.pwd-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 2px;
+    top: 2px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.pwd-toggle-switch input:checked + .pwd-toggle-slider {
+    background: var(--accent-green);
+}
+
+.pwd-toggle-switch input:checked + .pwd-toggle-slider::before {
+    transform: translateX(18px);
+}
+
+.pwd-form-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.pwd-form-cancel {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--button-bg);
+    color: var(--text-primary);
+    cursor: var(--cursor-pointer);
+    font-size: 13px;
+}
+
+.pwd-form-save {
+    padding: 8px 18px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    cursor: var(--cursor-pointer);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.pwd-form-cancel:hover { background: var(--button-hover); }
+.pwd-form-save:hover { filter: brightness(1.08); }
 
 /* Freeform */
 .freeform-container {
