@@ -3,11 +3,18 @@ window.renderMail = function(body, sidebar, toolbar, windowId) {
     let selectedEmailId = null;
     let showCompose = false;
 
+    const ic = {
+        inbox: `<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8v4.5a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8M2 8l2-4.5h8L14 8M2 8h3.5l1 1.5h3l1-1.5H14"/></svg>`,
+        sent: `<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8L14 2L9 14L7.5 9L2 8z"/></svg>`,
+        drafts: `<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13L11 4L13 6L4 15L1.5 14.5z"/><path d="M10 5l1 1"/></svg>`,
+        trash: `<svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="#fff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h10M5.5 4V2.5h5V4M5 4l.5 9h5L11 4"/></svg>`
+    };
+
     const mailboxes = [
-        { id: 'inbox', name: '收件箱', icon: '📥' },
-        { id: 'sent', name: '已发送', icon: '📤' },
-        { id: 'drafts', name: '草稿', icon: '📝' },
-        { id: 'trash', name: '废纸篓', icon: '🗑️' }
+        { id: 'inbox', name: '收件箱', icon: ic.inbox, bg: 'linear-gradient(135deg,#3a82f7,#0a84ff)' },
+        { id: 'sent', name: '已发送', icon: ic.sent, bg: 'linear-gradient(135deg,#34c759,#30d158)' },
+        { id: 'drafts', name: '草稿', icon: ic.drafts, bg: 'linear-gradient(135deg,#8e8e93,#48484a)' },
+        { id: 'trash', name: '废纸篓', icon: ic.trash, bg: 'linear-gradient(135deg,#8e8e93,#48484a)' }
     ];
 
     let emails = JSON.parse(localStorage.getItem('macos_mail') || 'null') || {
@@ -38,20 +45,24 @@ window.renderMail = function(body, sidebar, toolbar, windowId) {
     function renderSidebar() {
         if (!sidebar) return;
         sidebar.innerHTML = `
-            <div class="mail-sidebar" style="height:100%;display:flex;flex-direction:column;">
-                <div style="padding:12px;border-bottom:0.5px solid var(--border-color);">
-                    <button id="compose-btn" style="width:100%;padding:10px;background:var(--accent-blue);color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-weight:500;">
-                        ✏️ 新建邮件
+            <div class="mail-sidebar">
+                <div class="mail-sidebar-header">
+                    <button id="compose-btn" class="mail-compose-btn">
+                        <svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 11.5L11.5 2L12.5 3L3 12.5L1.5 12.5L1.5 11zM9 4l1 1"/></svg>
+                        <span>新建邮件</span>
                     </button>
                 </div>
-                <div style="flex:1;overflow-y:auto;padding:8px;">
-                    ${mailboxes.map(mb => `
-                        <div class="finder-sidebar-item ${currentMailbox === mb.id ? 'active' : ''}" data-mailbox="${mb.id}" style="margin-bottom:2px;">
-                            <span style="font-size:16px;">${mb.icon}</span>
-                            <span>${mb.name}</span>
-                            ${emails[mb.id]?.filter(e => e.unread).length > 0 ? `<span style="margin-left:auto;background:var(--accent-red);color:#fff;font-size:11px;padding:2px 6px;border-radius:10px;">${emails[mb.id].filter(e => e.unread).length}</span>` : ''}
+                <div class="mail-sidebar-list">
+                    ${mailboxes.map(mb => {
+                        const unread = emails[mb.id]?.filter(e => e.unread).length || 0;
+                        return `
+                        <div class="finder-sidebar-item mail-mailbox-item ${currentMailbox === mb.id ? 'active' : ''}" data-mailbox="${mb.id}">
+                            <div class="mail-mailbox-icon" style="background:${mb.bg};">${mb.icon}</div>
+                            <span class="finder-sidebar-label">${mb.name}</span>
+                            ${unread > 0 ? `<span class="mail-mailbox-badge">${unread}</span>` : ''}
                         </div>
-                    `).join('')}
+                    `;
+                    }).join('')}
                 </div>
             </div>
         `;
@@ -75,15 +86,33 @@ window.renderMail = function(body, sidebar, toolbar, windowId) {
         if (!toolbar) return;
         const currentEmail = emails[currentMailbox]?.find(e => e.id === selectedEmailId);
         toolbar.innerHTML = `
-            <div style="height:100%;display:flex;align-items:center;padding:0 12px;gap:8px;">
-                <button class="finder-toolbar-btn" id="back-btn" title="返回" ${!currentEmail && !showCompose ? 'disabled' : ''}>
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="currentColor"/></svg>
+            <div class="mail-toolbar">
+                <button class="mail-toolbar-btn" id="back-btn" title="返回" ${!currentEmail && !showCompose ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2L4 7l5 5"/></svg>
                 </button>
-                <button class="finder-toolbar-btn" id="delete-email-btn" title="删除" ${!currentEmail ? 'disabled' : ''}>
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/></svg>
+                <button class="mail-toolbar-btn" id="archive-btn" title="归档" ${!currentEmail ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2.5" width="10" height="2.5" rx="0.5"/><path d="M3 5v6.5a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V5M5.5 7.5h3"/></svg>
                 </button>
-                <button class="finder-toolbar-btn" id="reply-btn" title="回复" ${!currentEmail ? 'disabled' : ''}>
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z" fill="currentColor"/></svg>
+                <button class="mail-toolbar-btn" id="delete-email-btn" title="删除" ${!currentEmail ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h8M5.5 4V2.5h3V4M5 4l.5 8h3L9 4"/></svg>
+                </button>
+                <div class="toolbar-sep"></div>
+                <button class="mail-toolbar-btn" id="reply-btn" title="回复" ${!currentEmail ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L2 5.5L6 9M2 5.5h6a4 4 0 0 1 4 4v2"/></svg>
+                </button>
+                <button class="mail-toolbar-btn" id="reply-all-btn" title="回复全部" ${!currentEmail ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 2L1.5 5.5L5 9M3.5 2L0 5.5L3.5 9M3.5 5.5h6a4 4 0 0 1 4 4v2"/></svg>
+                </button>
+                <button class="mail-toolbar-btn" id="forward-btn" title="转发" ${!currentEmail ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2l4 3.5L8 9M12 5.5H6a4 4 0 0 0-4 4v2"/></svg>
+                </button>
+                <div class="toolbar-sep"></div>
+                <button class="mail-toolbar-btn" id="flag-btn" title="标记" ${!currentEmail ? 'disabled' : ''}>
+                    <svg viewBox="0 0 14 14" width="11" height="11" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 1.5v11M3 2.5h8l-1.5 3L11 8.5H3"/></svg>
+                </button>
+                <div style="flex:1;"></div>
+                <button class="mail-toolbar-btn" title="搜索">
+                    <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><path d="M9 9l3.5 3.5"/></svg>
                 </button>
             </div>
         `;
@@ -136,19 +165,19 @@ window.renderMail = function(body, sidebar, toolbar, windowId) {
     function renderContent() {
         if (showCompose) {
             body.innerHTML = `
-                <div style="flex:1;display:flex;flex-direction:column;background:var(--bg-elevated);padding:24px;">
-                    <div style="margin-bottom:16px;display:flex;gap:12px;align-items:center;">
-                        <span style="width:60px;color:var(--text-tertiary);font-size:13px;">收件人：</span>
-                        <input type="email" id="compose-to" style="flex:1;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border-color);border-radius:6px;font-size:14px;outline:none;" placeholder="输入邮箱地址">
+                <div class="mail-compose">
+                    <div class="mail-compose-field">
+                        <span class="mail-compose-label">收件人</span>
+                        <input type="email" id="compose-to" class="mail-compose-input" placeholder="输入邮箱地址">
                     </div>
-                    <div style="margin-bottom:16px;display:flex;gap:12px;align-items:center;">
-                        <span style="width:60px;color:var(--text-tertiary);font-size:13px;">主题：</span>
-                        <input type="text" id="compose-subject" style="flex:1;padding:8px 12px;background:var(--input-bg);border:1px solid var(--border-color);border-radius:6px;font-size:14px;outline:none;" placeholder="邮件主题">
+                    <div class="mail-compose-field">
+                        <span class="mail-compose-label">主题</span>
+                        <input type="text" id="compose-subject" class="mail-compose-input" placeholder="邮件主题">
                     </div>
-                    <textarea id="compose-content" style="flex:1;padding:12px;background:var(--input-bg);border:1px solid var(--border-color);border-radius:6px;font-size:14px;outline:none;resize:none;font-family:var(--system-font);line-height:1.6;" placeholder="邮件内容..."></textarea>
-                    <div style="margin-top:16px;display:flex;gap:8px;justify-content:flex-end;">
-                        <button id="cancel-compose" style="padding:8px 20px;border:1px solid var(--border-color);background:var(--button-bg);border-radius:6px;font-size:14px;cursor:pointer;">取消</button>
-                        <button id="send-email" style="padding:8px 20px;background:var(--accent-blue);color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500;">发送</button>
+                    <textarea id="compose-content" class="mail-compose-body" placeholder="邮件内容..."></textarea>
+                    <div class="mail-compose-actions">
+                        <button id="cancel-compose" class="btn btn-secondary">取消</button>
+                        <button id="send-email" class="btn btn-primary">发送</button>
                     </div>
                 </div>
             `;
@@ -190,18 +219,18 @@ window.renderMail = function(body, sidebar, toolbar, windowId) {
             currentEmail.unread = false;
             saveEmails();
             body.innerHTML = `
-                <div style="flex:1;display:flex;flex-direction:column;background:var(--bg-elevated);">
-                    <div style="padding:20px 24px;border-bottom:0.5px solid var(--border-color);">
-                        <h2 style="font-size:20px;font-weight:600;margin-bottom:16px;">${escapeHtml(currentEmail.subject)}</h2>
-                        <div style="display:flex;align-items:center;gap:12px;">
-                            <div style="width:40px;height:40px;border-radius:50%;background:var(--accent-blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;">${currentEmail.sender[0]}</div>
+                <div class="mail-message-view">
+                    <div class="mail-message-header">
+                        <h2 class="mail-message-subject">${escapeHtml(currentEmail.subject)}</h2>
+                        <div class="mail-message-sender">
+                            <div class="mail-sender-avatar">${currentEmail.sender[0]}</div>
                             <div>
-                                <div style="font-weight:500;">${escapeHtml(currentEmail.sender)}</div>
-                                <div style="font-size:12px;color:var(--text-tertiary);">${currentEmail.date}</div>
+                                <div class="mail-sender-name">${escapeHtml(currentEmail.sender)}</div>
+                                <div class="mail-sender-meta">${currentEmail.date}</div>
                             </div>
                         </div>
                     </div>
-                    <div style="flex:1;padding:24px;overflow-y:auto;white-space:pre-wrap;font-size:14px;line-height:1.8;-webkit-user-select:text;user-select:text;">${escapeHtml(currentEmail.content)}</div>
+                    <div class="mail-message-body">${escapeHtml(currentEmail.content)}</div>
                 </div>
             `;
             return;
@@ -212,26 +241,26 @@ window.renderMail = function(body, sidebar, toolbar, windowId) {
             <div class="mail-body">
                 <div class="mail-list">
                     ${emailList.length === 0 ? `
-                        <div style="padding:40px;text-align:center;color:var(--text-tertiary);">
-                            <div style="font-size:48px;margin-bottom:12px;">📭</div>
-                            <div>此邮箱暂无邮件</div>
+                        <div class="mail-empty">
+                            <svg viewBox="0 0 48 48" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><path d="M8 12h32v24H8zM8 12l16 14L40 12"/></svg>
+                            <div class="mail-empty-text">此邮箱暂无邮件</div>
                         </div>
                     ` : emailList.map(email => `
-                        <div class="mail-item ${selectedEmailId === email.id ? 'selected' : ''}" data-id="${email.id}">
-                            <div style="display:flex;justify-content:space-between;align-items:center;">
-                                <div class="mail-sender" style="${email.unread ? 'font-weight:700;' : ''}">${escapeHtml(email.sender)}</div>
-                                <div style="font-size:11px;color:var(--text-tertiary);">${email.date.split(' ')[0]}</div>
+                        <div class="mail-item ${selectedEmailId === email.id ? 'selected' : ''} ${email.unread ? 'unread' : ''}" data-id="${email.id}">
+                            <div class="mail-item-row">
+                                <div class="mail-sender">${escapeHtml(email.sender)}</div>
+                                <div class="mail-date">${email.date.split(' ')[0]}</div>
                             </div>
-                            <div class="mail-subject" style="${email.unread ? 'font-weight:600;' : ''}">${escapeHtml(email.subject)}</div>
+                            <div class="mail-subject">${escapeHtml(email.subject)}</div>
                             <div class="mail-preview">${escapeHtml(email.preview)}</div>
-                            ${email.unread ? '<div style="position:absolute;top:16px;left:8px;width:8px;height:8px;border-radius:50%;background:var(--accent-blue);"></div>' : ''}
+                            ${email.unread ? '<div class="mail-unread-dot"></div>' : ''}
                         </div>
                     `).join('')}
                 </div>
-                <div class="mail-message" style="display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);">
-                    <div style="text-align:center;">
-                        <div style="font-size:64px;margin-bottom:16px;">📧</div>
-                        <div>选择一封邮件阅读</div>
+                <div class="mail-message mail-empty-pane">
+                    <div class="mail-empty">
+                        <svg viewBox="0 0 56 56" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"><path d="M10 14h36v28H10zM10 14l18 16L46 14"/></svg>
+                        <div class="mail-empty-text">选择一封邮件阅读</div>
                     </div>
                 </div>
             </div>
