@@ -37,41 +37,96 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
         return proxy.prefix + encodeURIComponent(url);
     }
 
+    function displayUrl(url) {
+        if (!url) return '';
+        return url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    }
+
+    function isSecure(url) {
+        return url.startsWith('https://');
+    }
+
     function renderToolbar() {
         if (!toolbar) return;
+        const canBack = historyIndex > 0;
+        const canFwd = historyIndex < history.length - 1;
+        const sec = currentUrl && isSecure(currentUrl);
+        const proxyName = PROXY_SERVICES[currentProxyIndex]?.name || '';
+
         toolbar.innerHTML = `
-            <div class="safari-toolbar" style="height:100%;">
-                <button class="safari-nav-btn" id="safari-back" ${historyIndex === 0 ? 'disabled' : ''}>
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
-                </button>
-                <button class="safari-nav-btn" id="safari-forward" ${historyIndex >= history.length - 1 ? 'disabled' : ''}>
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
-                </button>
-                <div style="flex:1;display:flex;justify-content:center;">
-                    <input type="text" class="safari-url-bar" id="safari-url" value="${currentUrl}" placeholder="搜索或输入网址">
+            <div class="safari-toolbar">
+                <div class="safari-toolbar-group">
+                    <button class="safari-icon-btn" id="safari-back" ${canBack ? '' : 'disabled'} title="后退" aria-label="后退">
+                        <svg viewBox="0 0 14 14" width="14" height="14"><path d="M9.5 2L4 7l5.5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="safari-icon-btn" id="safari-forward" ${canFwd ? '' : 'disabled'} title="前进" aria-label="前进">
+                        <svg viewBox="0 0 14 14" width="14" height="14"><path d="M4.5 2L10 7l-5.5 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                 </div>
-                <button class="safari-nav-btn" id="safari-home" title="主页">
-                    <svg viewBox="0 0 24 24" width="16" height="16"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg>
-                </button>
-                <button class="safari-nav-btn" id="safari-proxy" title="${useProxy ? '关闭代理' : '启用代理'}" style="${useProxy ? 'background:rgba(255,149,0,0.3);' : ''}">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                        <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                    </svg>
-                </button>
-                <button class="safari-nav-btn" id="safari-external" title="在浏览器中打开" style="display:${currentUrl ? 'flex' : 'none'};">
-                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                </button>
+                <div class="safari-toolbar-group">
+                    <button class="safari-icon-btn" id="safari-reload" title="重新载入" aria-label="重新载入">
+                        <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 7a4.5 4.5 0 0 1 8-2.8"/><path d="M11.5 7a4.5 4.5 0 0 1-8 2.8"/><path d="M9.5 1.8v2.6h-2.6"/><path d="M4.5 12.2v-2.6h2.6"/></svg>
+                    </button>
+                </div>
+                <div class="safari-address-wrap">
+                    <div class="safari-address-bar">
+                        ${currentUrl ? `
+                            <span class="safari-lock-icon" title="${sec ? '连接安全' : '不安全连接'}">
+                                ${sec ? `<svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor"><path d="M3 5V4a3 3 0 0 1 6 0v1h.5a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 .5-.5H3zm1 0h4V4a2 2 0 1 0-4 0v1z"/></svg>` : `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M2 6h8M6 2v8"/></svg>`}
+                            </span>
+                            <span class="safari-domain-text">${displayUrl(currentUrl)}</span>
+                            <input type="text" class="safari-url-input" id="safari-url" value="${currentUrl}" spellcheck="false" autocomplete="off">
+                        ` : `
+                            <span class="safari-search-icon">
+                                <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="4"/><path d="M9 9l3.5 3.5"/></svg>
+                            </span>
+                            <input type="text" class="safari-url-input is-placeholder" id="safari-url" value="" placeholder="搜索或输入网站名称" spellcheck="false" autocomplete="off">
+                        `}
+                    </div>
+                </div>
+                <div class="safari-toolbar-group">
+                    <button class="safari-icon-btn" id="safari-home" title="起始页" aria-label="起始页">
+                        <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.5L7 2.5l5 4"/><path d="M3.5 5.7v5.3a.5.5 0 0 0 .5.5h2.5V8.5h1.5V11.5h2.5a.5.5 0 0 0 .5-.5V5.7"/></svg>
+                    </button>
+                    <button class="safari-icon-btn ${useProxy ? 'active' : ''}" id="safari-proxy" title="${useProxy ? `代理: ${proxyName}` : '启用代理'}" aria-label="代理">
+                        <svg viewBox="0 0 14 14" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6.5" width="10" height="6" rx="1.2"/><path d="M4.5 6.5V4.5a2.5 2.5 0 0 1 5 0v2"/></svg>
+                    </button>
+                    <button class="safari-icon-btn" id="safari-external" title="在浏览器中打开" style="display:${currentUrl ? 'flex' : 'none'};" aria-label="在浏览器中打开">
+                        <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8.5v2.5a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h2.5"/><path d="M8 2h4v4"/><path d="M5.5 8.5L12 2"/></svg>
+                    </button>
+                </div>
             </div>
         `;
 
         const urlInput = toolbar.querySelector('#safari-url');
+        const addressBar = toolbar.querySelector('.safari-address-bar');
+
         urlInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 navigateTo(urlInput.value.trim());
+            } else if (e.key === 'Escape') {
+                urlInput.value = currentUrl;
+                urlInput.blur();
             }
         });
-        urlInput.addEventListener('focus', () => urlInput.select());
+        urlInput.addEventListener('focus', () => {
+            urlInput.select();
+            addressBar?.classList.add('focused');
+            if (addressBar) {
+                // 隐藏 domain text 编辑时
+                const dt = addressBar.querySelector('.safari-domain-text');
+                const lock = addressBar.querySelector('.safari-lock-icon');
+                if (dt) dt.style.opacity = '0';
+                if (lock) lock.style.opacity = '0';
+            }
+        });
+        urlInput.addEventListener('blur', () => {
+            addressBar?.classList.remove('focused');
+            const dt = addressBar?.querySelector('.safari-domain-text');
+            const lock = addressBar?.querySelector('.safari-lock-icon');
+            if (dt) dt.style.opacity = '';
+            if (lock) lock.style.opacity = '';
+        });
 
         toolbar.querySelector('#safari-back').addEventListener('click', () => {
             if (historyIndex > 0) {
@@ -87,6 +142,10 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
                 currentUrl = history[historyIndex];
                 render();
             }
+        });
+
+        toolbar.querySelector('#safari-reload').addEventListener('click', () => {
+            if (currentUrl) render();
         });
 
         toolbar.querySelector('#safari-home').addEventListener('click', () => {
@@ -210,15 +269,12 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
         if (!currentUrl) {
             body.innerHTML = `
                 <div class="safari-content safari-home">
-                    <div style="font-size:48px;font-weight:700;margin-bottom:8px;background:linear-gradient(135deg,#007aff,#5856d6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Safari</div>
-                    <div style="color:#888;margin-bottom:32px;font-size:14px;">欢迎使用 Safari 浏览器</div>
-                    <div class="safari-search-box">
-                        <input type="text" class="safari-search-input" id="safari-search" placeholder="搜索或输入网址" autofocus>
-                    </div>
+                    <div class="safari-title">Safari</div>
+                    <div class="safari-subtitle">收藏的开始页面</div>
                     <div class="safari-favorites">
                         ${favorites.map(fav => `
                             <div class="safari-fav-item" data-url="${fav.url}">
-                                <div class="safari-fav-icon" style="background:${fav.color};color:#fff;font-weight:600;font-size:22px;">${fav.icon}</div>
+                                <div class="safari-fav-icon" style="background:${fav.color};">${fav.icon}</div>
                                 <div class="safari-fav-name">${fav.name}</div>
                             </div>
                         `).join('')}
@@ -226,19 +282,17 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
                 </div>
             `;
 
-            const searchInput = body.querySelector('#safari-search');
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    navigateTo(searchInput.value.trim());
-                }
-            });
-            setTimeout(() => searchInput.focus(), 100);
-
             body.querySelectorAll('.safari-fav-item').forEach(item => {
                 item.addEventListener('click', () => {
                     navigateTo(item.dataset.url);
                 });
             });
+
+            // 让地址栏获得焦点
+            setTimeout(() => {
+                const urlInput = toolbar?.querySelector('#safari-url');
+                if (urlInput) urlInput.focus();
+            }, 120);
         } else {
             const iframeSrc = useProxy ? getProxyUrl(currentUrl) : currentUrl;
             body.innerHTML = `
