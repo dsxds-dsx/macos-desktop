@@ -600,11 +600,11 @@ class AppManager {
     }
 
     hasToolbar(appId) {
-        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders'].includes(appId);
+        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies'].includes(appId);
     }
 
     hasSidebar(appId) {
-        return ['finder', 'notes', 'mail', 'messages', 'settings', 'music', 'contacts', 'ai', 'reminders'].includes(appId);
+        return ['finder', 'notes', 'mail', 'messages', 'settings', 'music', 'contacts', 'ai', 'reminders', 'textedit'].includes(appId);
     }
 
     renderApp(windowId, appId) {
