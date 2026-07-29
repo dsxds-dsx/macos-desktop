@@ -2207,7 +2207,19 @@
     padding: 14px 8px;
     border-radius: 14px;
     cursor: var(--cursor-pointer);
-    transition: transform 0.15s, background 0.15s;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.15s;
+    animation: launchpad-item-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes launchpad-item-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.6) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .launchpad-item:hover {

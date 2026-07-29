@@ -314,23 +314,27 @@ class AppManager {
 
     setupDockMagnification(dock) {
         const items = dock.querySelectorAll('.dock-item');
-        const baseSize = 54;
-        const maxSize = 80;
-        const magnificationRange = 150;
+        const baseSize = 50;
+        const maxSize = 78;
+        const magnificationRange = 140;
 
         dock.addEventListener('mousemove', (e) => {
             const dockRect = dock.getBoundingClientRect();
             const mouseX = e.clientX - dockRect.left;
 
             items.forEach((item) => {
+                if (item.classList.contains('bounce')) return;
                 const itemRect = item.getBoundingClientRect();
                 const itemCenterX = itemRect.left - dockRect.left + itemRect.width / 2;
                 const distance = Math.abs(mouseX - itemCenterX);
 
                 if (distance < magnificationRange) {
-                    const ratio = 1 - distance / magnificationRange;
-                    const scale = 1 + ratio * ratio * ((maxSize - baseSize) / baseSize);
-                    const translateY = (scale - 1) * baseSize * 0.6;
+                    // cosine curve, smoother than quadratic
+                    const ratio = Math.cos((distance / magnificationRange) * (Math.PI / 2));
+                    const eased = ratio * ratio;
+                    const scale = 1 + eased * ((maxSize - baseSize) / baseSize);
+                    // Lift the icon up proportional to the scale
+                    const translateY = (scale - 1) * baseSize * 0.5;
                     item.style.transform = `scale(${scale}) translateY(-${translateY}px)`;
                 } else {
                     item.style.transform = '';

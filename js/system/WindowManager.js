@@ -43,13 +43,13 @@ class WindowManager {
             <div class="window-header">
                 <div class="window-controls">
                     <button class="window-control close" title="关闭">
-                        <svg viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 10 10"><path d="M3.2 3.2L6.8 6.8M6.8 3.2L3.2 6.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
                     </button>
                     <button class="window-control minimize" title="最小化">
-                        <svg viewBox="0 0 10 10"><path d="M2 5h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                        <svg viewBox="0 0 10 10"><path d="M2.8 5H7.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
                     </button>
-                    <button class="window-control maximize" title="最大化">
-                        <svg viewBox="0 0 10 10"><path d="M3 3h4v4H3z" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+                    <button class="window-control maximize" title="全屏">
+                        <svg viewBox="0 0 10 10"><path d="M2.8 5H7.2M5 2.8V7.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/></svg>
                     </button>
                 </div>
                 <div class="window-title">${title}</div>

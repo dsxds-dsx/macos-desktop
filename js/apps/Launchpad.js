@@ -39,12 +39,14 @@ window.renderLaunchpad = function(body, sidebar, toolbar, windowId) {
                         autocomplete="off">
                 </div>
                 <div class="launchpad-grid" id="lp-grid">
-                    ${pageApps.map(app => `
-                        <div class="launchpad-item" data-app-id="${app.id}" data-app-name="${app.name}">
+                    ${pageApps.map((app, i) => {
+                        const delay = Math.min(0.5, 0.03 * i + 0.05).toFixed(3);
+                        return `
+                        <div class="launchpad-item" data-app-id="${app.id}" data-app-name="${app.name}" style="animation-delay:${delay}s">
                             <div class="launchpad-icon">${IconGenerator.generate(app.icon, { emoji: app.emoji })}</div>
                             <div class="launchpad-name">${app.name}</div>
-                        </div>
-                    `).join('')}
+                        </div>`;
+                    }).join('')}
                     ${pageApps.length === 0 ? `
                         <div class="launchpad-empty">
                             <div style="font-size:60px;margin-bottom:12px;">🔍</div>
