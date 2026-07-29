@@ -362,19 +362,40 @@ function handleWindowMenuAction(action) {
         case 'zoom':
             if (activeWin) windowManager.toggleMaximize(activeWin.id);
             break;
-        case 'cycle-windows':
+        case 'cycle-windows': {
+            const wins = Array.from(windowManager.windows.values()).filter(w => !w.minimized);
+            if (wins.length < 2) break;
+            const idx = wins.findIndex(w => w.id === windowManager.activeWindow);
+            const next = wins[(idx + 1) % wins.length];
+            windowManager.focusWindow(next.id);
             break;
+        }
         case 'bring-all-front':
+            windowManager.windows.forEach(w => {
+                if (w.minimized) windowManager.restoreWindow(w.id);
+            });
             break;
         case 'mission-control':
             appManager?.openApp('missioncontrol');
             break;
         case 'show-all':
+            windowManager.windows.forEach(w => {
+                if (w.minimized) windowManager.restoreWindow(w.id);
+            });
             break;
-        case 'hide-others':
+        case 'hide-others': {
+            if (!activeWin) break;
+            windowManager.windows.forEach(w => {
+                if (w.id !== activeWin.id && !w.minimized) windowManager.minimizeWindow(w.id);
+            });
             break;
-        case 'show-desktop':
+        }
+        case 'show-desktop': {
+            windowManager.windows.forEach(w => {
+                if (!w.minimized) windowManager.minimizeWindow(w.id);
+            });
             break;
+        }
     }
 }
 

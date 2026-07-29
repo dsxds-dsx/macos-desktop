@@ -328,7 +328,8 @@ class AppManager {
                 const distance = Math.abs(mouseX - itemCenterX);
 
                 if (distance < magnificationRange) {
-                    const scale = 1 + (1 - distance / magnificationRange) * ((maxSize - baseSize) / baseSize);
+                    const ratio = 1 - distance / magnificationRange;
+                    const scale = 1 + ratio * ratio * ((maxSize - baseSize) / baseSize);
                     const translateY = (scale - 1) * baseSize * 0.6;
                     item.style.transform = `scale(${scale}) translateY(-${translateY}px)`;
                 } else {

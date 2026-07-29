@@ -250,6 +250,8 @@ class WindowManager {
                 const remaining = Array.from(this.windows.keys());
                 if (remaining.length > 0) {
                     this.focusWindow(remaining[remaining.length - 1]);
+                } else if (window.appManager) {
+                    window.appManager.setActiveApp('finder');
                 }
             }
             this.updateDockState(winData.appName, false);
