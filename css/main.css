@@ -2,6 +2,10 @@
 :root {
     --cursor-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M5 3L5 19L9.5 14.5L12.5 21L15 20L12 13.5L18 13.5Z' fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 1 1, default;
     --cursor-pointer: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M10 3C8.5 3 8 4.5 8 6V12L6.5 11C5.5 10 4 10 3 11L2 12L6 17.5C7 19.5 9 21 11 21H14.5C17.5 21 19.5 19 19.5 16V13.5C19.5 12 18.5 10.5 17 10.5C17 9 16 7.5 14.5 7.5H13.5V6C13.5 4.5 12.5 3 11 3H10Z' fill='black' stroke='white' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E") 6 4, pointer;
+    --cursor-ew: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='24' viewBox='0 0 28 24'%3E%3Cpath d='M14 5L9 12L14 19M14 19L19 12L14 5' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M3 12L9 12M19 12L25 12' stroke='black' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3Cpath d='M6 9L3 12L6 15M22 9L25 12L22 15' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 14 12, ew-resize;
+    --cursor-ns: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='28' viewBox='0 0 24 28'%3E%3Cpath d='M5 14L12 9L19 14M19 14L12 19L5 14' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 3L12 9M12 19L12 25' stroke='black' stroke-width='1.5' stroke-linecap='round' fill='none'/%3E%3Cpath d='M9 6L12 3L15 6M9 22L12 25L15 22' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 12 14, ns-resize;
+    --cursor-nwse: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M6 6L13 13M6 6L6 12M6 6L12 6M22 22L15 15M22 22L22 16M22 22L16 22' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 6 6, nwse-resize;
+    --cursor-nesw: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'%3E%3Cpath d='M22 6L15 13M22 6L22 12M22 6L16 6M6 22L13 15M6 22L6 16M6 22L12 22' fill='none' stroke='black' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") 22 6, nesw-resize;
 }
 
 body {
@@ -497,14 +501,16 @@ body {
 }
 
 .dock-item.bounce {
-    animation: dock-bounce 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation: dock-bounce 0.9s cubic-bezier(0.32, 0, 0.67, 0.32) 1;
 }
 
 @keyframes dock-bounce {
-    0% { transform: translateY(0); }
-    30% { transform: translateY(-22px); }
-    50% { transform: translateY(-6px); }
-    70% { transform: translateY(-14px); }
+    0%   { transform: translateY(0); }
+    25%  { transform: translateY(-30px); }
+    50%  { transform: translateY(0); }
+    65%  { transform: translateY(-12px); }
+    80%  { transform: translateY(0); }
+    90%  { transform: translateY(-4px); }
     100% { transform: translateY(0); }
 }
 
@@ -1596,18 +1602,19 @@ body {
     position: fixed;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.9);
-    background: rgba(40, 40, 40, 0.85);
+    transform: translate(-50%, -50%) scale(0.85);
+    background: rgba(40, 40, 40, 0.7);
     backdrop-filter: blur(60px) saturate(180%);
     -webkit-backdrop-filter: blur(60px) saturate(180%);
     border-radius: 24px;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 0.5px solid rgba(255,255,255,0.15);
     box-shadow: 0 30px 90px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(0,0,0,0.2);
     padding: 24px 28px 20px;
     z-index: 9600;
     display: none;
     opacity: 0;
-    transition: all 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+    transition: opacity 0.2s cubic-bezier(0.32, 0.72, 0, 1),
+                transform 0.28s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .app-switcher.show {
@@ -1618,7 +1625,7 @@ body {
 
 .app-switcher-items {
     display: flex;
-    gap: 12px;
+    gap: 14px;
     align-items: center;
     justify-content: center;
     min-width: 600px;
@@ -1629,21 +1636,22 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     padding: 10px;
     border-radius: 12px;
-    transition: all 0.15s ease;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background 0.15s ease;
     cursor: var(--cursor-pointer);
 }
 
 .app-switcher-item.selected {
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.18);
     transform: scale(1.15);
 }
 
 .app-switcher-item-icon {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1651,11 +1659,11 @@ body {
 
 .app-switcher-item-icon svg,
 .app-switcher-item-icon img {
-    width: 56px;
-    height: 56px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
     border-radius: 22%;
-    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4));
 }
 
 .app-switcher-item-name {

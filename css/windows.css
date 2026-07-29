@@ -367,7 +367,7 @@
     left: 12px;
     right: 12px;
     height: 6px;
-    cursor: n-resize;
+    cursor: var(--cursor-ns);
 }
 
 .resize-handle.s {
@@ -375,7 +375,7 @@
     left: 12px;
     right: 12px;
     height: 6px;
-    cursor: s-resize;
+    cursor: var(--cursor-ns);
 }
 
 .resize-handle.e {
@@ -383,7 +383,7 @@
     right: 0;
     bottom: 12px;
     width: 6px;
-    cursor: e-resize;
+    cursor: var(--cursor-ew);
 }
 
 .resize-handle.w {
@@ -391,7 +391,7 @@
     left: 0;
     bottom: 12px;
     width: 6px;
-    cursor: w-resize;
+    cursor: var(--cursor-ew);
 }
 
 .resize-handle.ne {
@@ -399,7 +399,7 @@
     right: 0;
     width: 12px;
     height: 12px;
-    cursor: ne-resize;
+    cursor: var(--cursor-nesw);
 }
 
 .resize-handle.nw {
@@ -407,7 +407,7 @@
     left: 0;
     width: 12px;
     height: 12px;
-    cursor: nw-resize;
+    cursor: var(--cursor-nwse);
 }
 
 .resize-handle.se {
@@ -415,7 +415,7 @@
     right: 0;
     width: 12px;
     height: 12px;
-    cursor: se-resize;
+    cursor: var(--cursor-nwse);
 }
 
 .resize-handle.sw {
@@ -423,7 +423,7 @@
     left: 0;
     width: 12px;
     height: 12px;
-    cursor: sw-resize;
+    cursor: var(--cursor-nesw);
 }
 
 .btn {
