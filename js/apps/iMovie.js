@@ -1,178 +1,529 @@
+// iMovie - 视频编辑 (macOS Sonoma)
 window.renderiMovie = function(body, sidebar, toolbar, windowId) {
-    const content = body;
-    content.innerHTML = '';
-    content.style.background = '#1a1a1a';
-    content.style.display = 'flex';
-    content.style.flexDirection = 'column';
+    const STORAGE_KEY = 'macos_imovie_v3';
+    const STATE_KEY = STORAGE_KEY + '_state';
 
-    let currentTab = 'movie';
-    let isPlaying = false;
-    let projects = [
-        { id: 1, name: '度假视频', thumbnail: '🏖️', duration: '2:34', date: '2024-01-15', clips: 5 },
-        { id: 2, name: '家庭聚会', thumbnail: '👨‍👩‍👧‍👦', duration: '5:12', date: '2024-01-10', clips: 12 },
-        { id: 3, name: '生日派对', thumbnail: '🎂', duration: '3:45', date: '2024-01-05', clips: 8 }
-    ];
-    let currentProject = null;
-    let clips = [
-        { id: 1, name: '开场.mp4', thumb: '🌅', duration: 8, start: 0 },
-        { id: 2, name: '海滩1.mp4', thumb: '🌊', duration: 12, start: 8 },
-        { id: 3, name: '日落.mp4', thumb: '🌇', duration: 6, start: 20 },
-        { id: 4, name: '晚餐.mp4', thumb: '🍽️', duration: 15, start: 26 }
+    function defaultProjects() {
+        return [
+            { id: 1, name: '度假视频', duration: '2:34', date: '2024-01-15', clips: 5, color: 'linear-gradient(135deg,#4a90d9,#764ba2)' },
+            { id: 2, name: '家庭聚会', duration: '5:12', date: '2024-01-10', clips: 12, color: 'linear-gradient(135deg,#f093fb,#f5576c)' },
+            { id: 3, name: '生日派对', duration: '3:45', date: '2024-01-05', clips: 8, color: 'linear-gradient(135deg,#fa709a,#fee140)' }
+        ];
+    }
+
+    function defaultClips() {
+        return [
+            { id: 1, name: '开场.mp4', duration: 8, color: '#4A90D9' },
+            { id: 2, name: '海滩1.mp4', duration: 12, color: '#D94A4A' },
+            { id: 3, name: '日落.mp4', duration: 6, color: '#4AD97A' },
+            { id: 4, name: '晚餐.mp4', duration: 15, color: '#D9A64A' }
+        ];
+    }
+
+    function defaultState() {
+        return { currentProjectId: null, currentTab: 'movie', isPlaying: false, nextProjectId: 4, nextClipId: 5, playheadPos: 0 };
+    }
+
+    function migrateOld() {
+        const oldProjects = JSON.parse(localStorage.getItem('macos_imovie_v2_projects') || 'null');
+        const oldClips = JSON.parse(localStorage.getItem('macos_imovie_v2_clips') || 'null');
+        const oldState = JSON.parse(localStorage.getItem('macos_imovie_v2_state') || 'null');
+        if (!Array.isArray(oldProjects) || !oldProjects.length) return null;
+        return {
+            projects: oldProjects,
+            clips: Array.isArray(oldClips) ? oldClips : [],
+            state: oldState || defaultState()
+        };
+    }
+
+    let projects, clips, state;
+    const migrated = migrateOld();
+    projects = JSON.parse(localStorage.getItem(STORAGE_KEY + '_projects') || 'null') || (migrated ? migrated.projects : null) || defaultProjects();
+    clips = JSON.parse(localStorage.getItem(STORAGE_KEY + '_clips') || 'null') || (migrated ? migrated.clips : null) || defaultClips();
+    state = JSON.parse(localStorage.getItem(STATE_KEY) || 'null') || (migrated ? migrated.state : null) || defaultState();
+    state.isPlaying = false;
+
+    function save() {
+        localStorage.setItem(STORAGE_KEY + '_projects', JSON.stringify(projects));
+        localStorage.setItem(STORAGE_KEY + '_clips', JSON.stringify(clips));
+        localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    }
+    function showToast(text, type) {
+        if (window.toast) window.toast(text, type || 'info');
+        else if (window.Toast) window.Toast.show(text);
+    }
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function fmtTime(sec) {
+        sec = Math.max(0, Math.floor(sec));
+        return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
+    }
+
+    // ----- SVG icons -----
+    const ICON = {
+        play: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+        pause: '<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+        back: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
+        add: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+        share: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>',
+        film: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M7 3v18M17 3v18M2 9h5M2 15h5M17 9h5M17 15h5"/></svg>',
+        video: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>',
+        music: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+        transition: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h6M4 12h12M4 18h8M16 12l4-4M16 12l4 4"/></svg>',
+        adjust: '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6M12 17v6M4.22 4.22l4.24 4.24M15.54 15.54l4.24 4.24M1 12h6M17 12h6M4.22 19.78l4.24-4.24M15.54 8.46l4.24-4.24"/></svg>',
+        trash: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+        split: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v6M12 15v6M5 12h6M13 12h6"/><circle cx="12" cy="12" r="2"/></svg>',
+        volume: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>'
+    };
+
+    const projectColors = [
+        'linear-gradient(135deg,#4a90d9,#764ba2)',
+        'linear-gradient(135deg,#f093fb,#f5576c)',
+        'linear-gradient(135deg,#fa709a,#fee140)',
+        'linear-gradient(135deg,#30cfd0,#330867)',
+        'linear-gradient(135deg,#667eea,#764ba2)',
+        'linear-gradient(135deg,#11998e,#38ef7d)'
     ];
 
-    function render() {
-        if (!currentProject) {
-            renderProjects();
+    const clipColors = ['#4A90D9', '#D94A4A', '#4AD97A', '#D9A64A', '#9B59B6', '#E67E22'];
+
+    const mediaTypes = [
+        { id: 'video', name: '视频片段', icon: 'video' },
+        { id: 'music', name: '音频', icon: 'music' },
+        { id: 'transition', name: '转场', icon: 'transition' },
+        { id: 'adjust', name: '调整', icon: 'adjust' }
+    ];
+
+    const transitions = [
+        { name: '交叉叠化', dur: 1.0 },
+        { name: '推入', dur: 0.8 },
+        { name: '擦除', dur: 1.2 },
+        { name: '缩放', dur: 0.6 },
+        { name: '旋转', dur: 1.5 },
+        { name: '淡入', dur: 1.0 }
+    ];
+
+    let playTimer = null;
+    let selectedClipId = null;
+
+    function getCurrentProject() {
+        return projects.find(p => p.id === state.currentProjectId) || null;
+    }
+
+    function getTotalDuration() {
+        return clips.reduce((a, c) => a + c.duration, 0);
+    }
+
+    function renderToolbar() {
+        if (!toolbar) return;
+        const proj = getCurrentProject();
+        if (proj) {
+            const totalStr = fmtTime(getTotalDuration());
+            toolbar.innerHTML = `
+                <div class="imovie-toolbar">
+                    <button class="imovie-tb-btn" id="imovie-back" title="返回">${ICON.back}<span>项目</span></button>
+                    <div class="imovie-tb-sep"></div>
+                    <span class="imovie-tb-title">${escapeHtml(proj.name)}</span>
+                    <span class="imovie-tb-dur">${totalStr}</span>
+                    <div class="imovie-tb-spacer"></div>
+                    <button class="imovie-tb-btn" id="imovie-split" title="分割片段">${ICON.split}</button>
+                    <button class="imovie-play-btn ${state.isPlaying ? 'playing' : ''}" id="imovie-play" title="${state.isPlaying ? '暂停' : '播放'}">${state.isPlaying ? ICON.pause : ICON.play}</button>
+                    <div class="imovie-tb-sep"></div>
+                    <button class="imovie-tb-btn primary" id="imovie-share" title="分享">${ICON.share}<span>分享</span></button>
+                </div>
+            `;
+            toolbar.querySelector('#imovie-back')?.addEventListener('click', () => {
+                stopPlayback();
+                state.currentProjectId = null;
+                selectedClipId = null;
+                save();
+                render();
+            });
+            toolbar.querySelector('#imovie-play')?.addEventListener('click', () => {
+                if (state.isPlaying) {
+                    stopPlayback();
+                } else {
+                    startPlayback();
+                }
+                renderToolbar();
+            });
+            toolbar.querySelector('#imovie-split')?.addEventListener('click', () => {
+                if (selectedClipId == null) {
+                    showToast('请先选择一个片段', 'info');
+                    return;
+                }
+                const clip = clips.find(c => c.id === selectedClipId);
+                if (!clip || clip.duration < 2) {
+                    showToast('片段太短，无法分割', 'info');
+                    return;
+                }
+                const half = Math.floor(clip.duration / 2);
+                const newClip = {
+                    id: state.nextClipId++,
+                    name: clip.name.replace(/\.mp4$/, '_b.mp4'),
+                    duration: clip.duration - half,
+                    color: clip.color
+                };
+                clip.duration = half;
+                clips.splice(clips.indexOf(clip) + 1, 0, newClip);
+                save();
+                renderContent();
+                showToast('已分割片段', 'success');
+            });
+            toolbar.querySelector('#imovie-share')?.addEventListener('click', () => {
+                showToast('分享功能演示中', 'info');
+            });
         } else {
-            renderEditor();
+            toolbar.innerHTML = `
+                <div class="imovie-toolbar">
+                    <div class="imovie-tabs">
+                        <button class="imovie-tab ${state.currentTab === 'movie' ? 'active' : ''}" data-tab="movie">影片</button>
+                        <button class="imovie-tab ${state.currentTab === 'trailer' ? 'active' : ''}" data-tab="trailer">预告片</button>
+                        <button class="imovie-tab ${state.currentTab === 'media' ? 'active' : ''}" data-tab="media">媒体</button>
+                    </div>
+                    <div class="imovie-tb-spacer"></div>
+                    <button class="imovie-tb-btn primary" id="imovie-new" title="创建新项目">${ICON.add}<span>创建新项目</span></button>
+                </div>
+            `;
+            toolbar.querySelectorAll('.imovie-tab').forEach(t => {
+                t.addEventListener('click', () => {
+                    state.currentTab = t.dataset.tab;
+                    save();
+                    renderToolbar();
+                });
+            });
+            toolbar.querySelector('#imovie-new')?.addEventListener('click', async () => {
+                const name = await window.showPrompt('项目名称：', { value: '新项目' });
+                if (name) {
+                    const newP = {
+                        id: state.nextProjectId++,
+                        name,
+                        duration: '0:00',
+                        date: new Date().toISOString().split('T')[0],
+                        clips: 0,
+                        color: projectColors[(state.nextProjectId - 1) % projectColors.length]
+                    };
+                    projects.unshift(newP);
+                    state.currentProjectId = newP.id;
+                    clips = [];
+                    save();
+                    render();
+                    showToast('已创建项目：' + name, 'success');
+                }
+            });
+        }
+    }
+
+    function renderSidebar() {
+        if (!sidebar) return;
+        const proj = getCurrentProject();
+        if (proj) {
+            sidebar.innerHTML = `
+                <div class="imovie-sidebar">
+                    <div class="imovie-sidebar-section">
+                        <div class="imovie-sidebar-head">
+                            <span class="imovie-sidebar-title">媒体</span>
+                            <span class="imovie-sidebar-count">${mediaTypes.length}</span>
+                        </div>
+                        <div class="imovie-media-grid">
+                            ${mediaTypes.map(m => `
+                                <div class="imovie-media-item" data-type="${m.id}" title="${escapeHtml(m.name)}">
+                                    ${ICON[m.icon]}
+                                    <span class="imovie-media-label">${escapeHtml(m.name)}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="imovie-sidebar-section">
+                        <div class="imovie-sidebar-head">
+                            <span class="imovie-sidebar-title">转场效果</span>
+                        </div>
+                        <div class="imovie-transitions-grid">
+                            ${transitions.map(t => `
+                                <div class="imovie-transition-item" data-name="${escapeHtml(t.name)}">
+                                    <span>${escapeHtml(t.name)}</span>
+                                    <span class="imovie-transition-dur">${t.dur}s</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+            sidebar.querySelectorAll('.imovie-media-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const type = item.dataset.type;
+                    if (type === 'video') {
+                        const color = clipColors[Math.floor(Math.random() * clipColors.length)];
+                        clips.push({
+                            id: state.nextClipId++,
+                            name: '片段 ' + clips.length + '.mp4',
+                            duration: 5 + Math.floor(Math.random() * 10),
+                            color
+                        });
+                        save();
+                        renderContent();
+                        renderToolbar();
+                        showToast('已添加片段', 'success');
+                    } else {
+                        showToast('演示应用：' + mediaTypes.find(m => m.id === type)?.name + ' 不可用', 'info');
+                    }
+                });
+            });
+            sidebar.querySelectorAll('.imovie-transition-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    showToast('已应用转场：' + item.dataset.name, 'info');
+                });
+            });
+        } else {
+            sidebar.innerHTML = `
+                <div class="imovie-sidebar">
+                    <div class="imovie-sidebar-head">
+                        <span class="imovie-sidebar-title">项目</span>
+                        <span class="imovie-sidebar-count">${projects.length}</span>
+                    </div>
+                    <div class="imovie-projects-list">
+                        ${projects.map(p => `
+                            <div class="imovie-project-item ${state.currentProjectId === p.id ? 'active' : ''}" data-id="${p.id}">
+                                ${ICON.film}
+                                <div class="imovie-project-info">
+                                    <div class="imovie-project-name">${escapeHtml(p.name)}</div>
+                                    <div class="imovie-project-meta">${p.duration} · ${p.clips} 片段</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            sidebar.querySelectorAll('.imovie-project-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    state.currentProjectId = parseInt(el.dataset.id, 10);
+                    selectedClipId = null;
+                    save();
+                    render();
+                });
+            });
+        }
+    }
+
+    function renderContent() {
+        const proj = getCurrentProject();
+        if (proj) {
+            renderEditor(proj);
+        } else {
+            renderProjects();
         }
     }
 
     function renderProjects() {
-        content.innerHTML = `
-            <div style="height:48px;background:linear-gradient(180deg,#2d2d2d,#252525);border-bottom:1px solid #444;display:flex;align-items:center;padding:0 16px;gap:12px;">
-                <div style="display:flex;background:#333;border-radius:6px;padding:2px;">
-                    <button class="im-tab" data-tab="movie" style="padding:6px 16px;border:none;border-radius:4px;background:${currentTab==='movie'?'var(--accent-blue)':'transparent'};color:#fff;cursor:pointer;font-size:12px;">影片</button>
-                    <button class="im-tab" data-tab="trailer" style="padding:6px 16px;border:none;border-radius:4px;background:${currentTab==='trailer'?'var(--accent-blue)':'transparent'};color:#fff;cursor:pointer;font-size:12px;">预告片</button>
-                    <button class="im-tab" data-tab="media" style="padding:6px 16px;border:none;border-radius:4px;background:${currentTab==='media'?'var(--accent-blue)':'transparent'};color:#fff;cursor:pointer;font-size:12px;">媒体</button>
+        body.innerHTML = `
+            <div class="imovie-body">
+                <div class="imovie-content-scroll">
+                    <h2 class="imovie-page-title">项目</h2>
+                    ${projects.length === 0 ? `
+                        <div class="imovie-empty">
+                            <div class="imovie-empty-icon">${ICON.film}</div>
+                            <div class="imovie-empty-text">还没有项目</div>
+                            <div class="imovie-empty-desc">点击工具栏的「创建新项目」开始</div>
+                        </div>
+                    ` : `
+                        <div class="imovie-projects-grid">
+                            ${projects.map(p => `
+                                <div class="imovie-project-card" data-id="${p.id}">
+                                    <div class="imovie-project-thumb" style="background:${p.color};">
+                                        ${ICON.film}
+                                    </div>
+                                    <div class="imovie-project-card-info">
+                                        <div class="imovie-project-card-name">${escapeHtml(p.name)}</div>
+                                        <div class="imovie-project-card-meta">
+                                            <span>${p.duration}</span>
+                                            <span>·</span>
+                                            <span>${p.clips} 个片段</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `}
                 </div>
-                <div style="flex:1;"></div>
-                <button id="im-new" style="padding:6px 16px;background:linear-gradient(180deg,#4a90d9,#3a7bc8);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:12px;">＋ 创建新项目</button>
-            </div>
-            <div style="flex:1;padding:30px;overflow:auto;">
-                <h2 style="color:#fff;font-size:22px;font-weight:600;margin:0 0 20px;">项目</h2>
-                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;" id="im-projects"></div>
             </div>
         `;
-
-        const projectsEl = content.querySelector('#im-projects');
-        projects.forEach(p => {
-            const card = document.createElement('div');
-            card.style.cssText = 'background:#2a2a2a;border-radius:10px;overflow:hidden;cursor:pointer;transition:transform 0.2s;';
-            card.onmouseenter = () => card.style.transform = 'scale(1.03)';
-            card.onmouseleave = () => card.style.transform = 'scale(1)';
-            card.onclick = () => { currentProject = p; render(); };
-            card.innerHTML = `
-                <div style="aspect-ratio:16/9;background:linear-gradient(135deg,#3a3a3a,#2a2a2a);display:flex;align-items:center;justify-content:center;font-size:64px;">${p.thumbnail}</div>
-                <div style="padding:12px;">
-                    <div style="color:#fff;font-weight:500;font-size:13px;margin-bottom:4px;">${p.name}</div>
-                    <div style="color:#888;font-size:11px;display:flex;justify-content:space-between;">
-                        <span>${p.duration}</span>
-                        <span>${p.clips} 个片段</span>
-                    </div>
-                </div>
-            `;
-            projectsEl.appendChild(card);
-        });
-
-        content.querySelectorAll('.im-tab').forEach(t => {
-            t.onclick = () => { currentTab = t.dataset.tab; render(); };
-        });
-
-        content.querySelector('#im-new').onclick = () => {
-            const name = prompt('项目名称：', '新项目');
-            if (name) {
-                const newP = { id: Date.now(), name, thumbnail: '🎬', duration: '0:00', date: new Date().toISOString().split('T')[0], clips: 0 };
-                projects.unshift(newP);
-                currentProject = newP;
-                clips = [];
+        body.querySelectorAll('.imovie-project-card').forEach(card => {
+            card.addEventListener('click', () => {
+                state.currentProjectId = parseInt(card.dataset.id, 10);
+                selectedClipId = null;
+                save();
                 render();
-            }
-        };
+            });
+        });
     }
 
-    function renderEditor() {
-        content.innerHTML = `
-            <div style="height:48px;background:linear-gradient(180deg,#2d2d2d,#252525);border-bottom:1px solid #444;display:flex;align-items:center;padding:0 16px;gap:12px;">
-                <button id="im-back" style="padding:6px 12px;background:#333;border:1px solid #555;border-radius:6px;color:#fff;cursor:pointer;font-size:12px;">← 返回</button>
-                <span style="color:#fff;font-weight:500;">${currentProject.name}</span>
-                <div style="flex:1;"></div>
-                <button id="im-play" style="width:32px;height:32px;border-radius:50%;border:none;background:${isPlaying?'#ff3b30':'var(--accent-blue)'};color:#fff;cursor:pointer;font-size:14px;">${isPlaying ? '❚❚' : '▶'}</button>
-                <button style="padding:6px 12px;background:#34c759;border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:12px;">分享</button>
-            </div>
-            <div style="display:flex;flex:1;overflow:hidden;">
-                <div style="width:240px;background:#252525;border-right:1px solid #333;padding:16px;overflow-y:auto;">
-                    <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:0 0 12px;">我的媒体</h4>
-                    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;" id="im-mediaList">
-                        ${['🌅','🌊','🌇','🍽️','🎵','📷','🌺','🏠'].map((e,i) => `<div class="im-importItem" data-i="${i}" style="aspect-ratio:1;background:#333;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;border:2px solid transparent;">${e}</div>`).join('')}
+    function renderEditor(proj) {
+        const totalDuration = getTotalDuration();
+        const totalStr = fmtTime(totalDuration);
+
+        body.innerHTML = `
+            <div class="imovie-body imovie-editor-body">
+                <div class="imovie-preview">
+                    <div class="imovie-preview-content" id="imovie-preview">
+                        ${ICON.film}
                     </div>
-                    <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:20px 0 12px;">音频</h4>
-                    <div style="display:flex;flex-direction:column;gap:6px;">
-                        ${['🎵 iTunes', '🎤 音效', '🎼 配乐', '🔊 旁白'].map(i => `<div style="padding:8px;background:#333;border-radius:4px;color:#ccc;font-size:12px;cursor:pointer;">${i}</div>`).join('')}
-                    </div>
-                    <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:20px 0 12px;">转场</h4>
-                    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;">
-                        ${['交叉叠化','推入','擦除','缩放','旋转','淡入'].map(t => `<div style="padding:8px;background:#333;border-radius:4px;color:#ccc;font-size:10px;text-align:center;cursor:pointer;">${t}</div>`).join('')}
-                    </div>
+                    <div class="imovie-timecode" id="imovie-timecode">00:00 / ${totalStr}</div>
                 </div>
-                <div style="flex:1;display:flex;flex-direction:column;">
-                    <div style="flex:1;background:#000;display:flex;align-items:center;justify-content:center;position:relative;">
-                        <div style="text-align:center;color:#666;font-size:48px;" id="im-preview">🎬</div>
-                        <div style="position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:#fff;background:rgba(0,0,0,0.6);padding:6px 14px;border-radius:20px;font-size:12px;font-family:monospace;" id="im-timecode">00:00 / ${clips.reduce((a,c) => a+c.duration, 0).toString().padStart(2,'0')}:00</div>
+                <div class="imovie-timeline-wrap">
+                    <div class="imovie-timeline-toolbar">
+                        <span class="imovie-timeline-label">时间线</span>
+                        <span class="imovie-timeline-info">${clips.length} 个片段 · ${totalStr}</span>
                     </div>
-                    <div style="height:180px;background:#1e1e1e;border-top:1px solid #333;position:relative;">
-                        <div style="height:30px;background:#2a2a2a;border-bottom:1px solid #333;display:flex;align-items:center;padding:0 10px;">
-                            ${Array.from({length:Math.ceil(clips.reduce((a,c) => a+c.duration, 0)/5)+1}, (_,i) => `<div style="position:absolute;left:${i*50}px;color:#666;font-size:10px;">${i*5}s</div>`).join('')}
-                        </div>
-                        <div style="position:absolute;top:30px;left:0;right:0;bottom:0;overflow-x:auto;padding:10px;">
-                            <div style="display:flex;min-width:100%;height:100%;gap:2px;" id="im-timeline">
-                                ${clips.map((c,i) => `<div class="im-clip" data-i="${i}" style="width:${c.duration*10}px;background:linear-gradient(135deg,${['#4a90d9','#d94a4a','#4ad97a','#d9a64a','#9b59b6'][i%5]},${['#3a7bc8','#c93a3a','#3ac96a','#c9963a','#8b49a6'][i%5]});border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:grab;position:relative;">${c.thumb}<div style="position:absolute;bottom:2px;right:4px;font-size:9px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.5);">${c.duration}s</div></div>`).join('')}
-                            </div>
+                    <div class="imovie-timeline-scroll">
+                        <div class="imovie-timeline-ruler" id="imovie-ruler"></div>
+                        <div class="imovie-timeline" id="imovie-timeline">
+                            <div class="imovie-playhead" id="imovie-playhead"></div>
+                            ${clips.length === 0 ? `
+                                <div class="imovie-timeline-empty">
+                                    ${ICON.add}
+                                    <span>点击侧边栏媒体添加片段</span>
+                                </div>
+                            ` : clips.map((c, i) => `
+                                <div class="imovie-clip ${selectedClipId === c.id ? 'selected' : ''}" data-id="${c.id}" style="width:${c.duration * 12}px;background:linear-gradient(135deg,${c.color},${c.color}cc);">
+                                    <span class="imovie-clip-name">${escapeHtml(c.name)}</span>
+                                    <span class="imovie-clip-dur">${c.duration}s</span>
+                                    <button class="imovie-clip-del" data-del="${c.id}" title="删除">${ICON.trash}</button>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
-                </div>
-                <div style="width:200px;background:#252525;border-left:1px solid #333;padding:16px;">
-                    <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:0 0 12px;">调整</h4>
-                    <div style="margin-bottom:16px;">
-                        <label style="color:#ccc;font-size:11px;display:block;margin-bottom:6px;">亮度</label>
-                        <input type="range" min="-50" max="50" value="0" style="width:100%;">
-                    </div>
-                    <div style="margin-bottom:16px;">
-                        <label style="color:#ccc;font-size:11px;display:block;margin-bottom:6px;">对比度</label>
-                        <input type="range" min="-50" max="50" value="0" style="width:100%;">
-                    </div>
-                    <div style="margin-bottom:16px;">
-                        <label style="color:#ccc;font-size:11px;display:block;margin-bottom:6px;">饱和度</label>
-                        <input type="range" min="-50" max="50" value="0" style="width:100%;">
-                    </div>
-                    <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:20px 0 12px;">速度</h4>
-                    <select style="width:100%;padding:6px;background:#333;border:1px solid #555;border-radius:4px;color:#fff;font-size:12px;">
-                        <option>1x 正常</option><option>0.5x 慢速</option><option>2x 快速</option><option>0.25x 极慢</option><option>4x 极快</option>
-                    </select>
                 </div>
             </div>
         `;
 
-        content.querySelector('#im-back').onclick = () => { currentProject = null; render(); };
+        // Render ruler
+        const ruler = body.querySelector('#imovie-ruler');
+        if (ruler) {
+            const rulerWidth = Math.max(totalDuration * 12, 200);
+            ruler.style.width = rulerWidth + 'px';
+            const marks = Math.ceil(totalDuration / 5) + 1;
+            let html = '';
+            for (let i = 0; i < marks; i++) {
+                html += `<div class="imovie-ruler-mark"><span>${fmtTime(i * 5)}</span></div>`;
+            }
+            ruler.innerHTML = html;
+        }
 
-        content.querySelectorAll('.im-importItem').forEach(item => {
-            item.onclick = () => {
-                const emojis = ['🌅','🌊','🌇','🍽️','🎵','📷','🌺','🏠'];
-                clips.push({ id: Date.now(), name: '新片段.mp4', thumb: emojis[parseInt(item.dataset.i)], duration: 5 + Math.floor(Math.random()*10), start: clips.reduce((a,c)=>a+c.duration,0) });
-                render();
-            };
+        // Clip selection
+        body.querySelectorAll('.imovie-clip').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (e.target.closest('.imovie-clip-del')) return;
+                selectedClipId = parseInt(el.dataset.id, 10);
+                renderContent();
+            });
         });
 
-        let playInterval;
-        content.querySelector('#im-play').onclick = () => {
-            isPlaying = !isPlaying;
-            const preview = content.querySelector('#im-preview');
-            const timecode = content.querySelector('#im-timecode');
-            let t = 0;
-            const total = clips.reduce((a,c) => a+c.duration, 0);
-            if (isPlaying) {
-                playInterval = setInterval(() => {
-                    t++;
-                    if (t >= total) { t = 0; }
-                    let curClip = clips[0], acc = 0;
-                    for (const c of clips) { if (acc + c.duration > t) { curClip = c; break; } acc += c.duration; }
-                    preview.textContent = curClip.thumb;
-                    timecode.textContent = `${String(Math.floor(t/60)).padStart(2,'0')}:${String(t%60).padStart(2,'0')} / ${String(Math.floor(total/60)).padStart(2,'0')}:${String(total%60).padStart(2,'0')}`;
-                }, 500);
-            } else {
-                clearInterval(playInterval);
+        // Clip delete
+        body.querySelectorAll('.imovie-clip-del').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = parseInt(btn.dataset.del, 10);
+                clips = clips.filter(c => c.id !== id);
+                if (selectedClipId === id) selectedClipId = null;
+                save();
+                renderContent();
+                renderToolbar();
+            });
+        });
+
+        // Timeline click to seek
+        const timeline = body.querySelector('#imovie-timeline');
+        if (timeline) {
+            timeline.addEventListener('click', (e) => {
+                if (e.target.closest('.imovie-clip') || e.target.closest('.imovie-clip-del')) return;
+                const rect = timeline.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const sec = Math.floor(x / 12);
+                state.playheadPos = Math.max(0, Math.min(sec, totalDuration));
+                updatePlayhead();
+                updateTimecode();
+            });
+        }
+
+        updatePlayhead();
+    }
+
+    function updatePlayhead() {
+        const playhead = body.querySelector('#imovie-playhead');
+        if (playhead) {
+            playhead.style.left = (state.playheadPos * 12) + 'px';
+        }
+    }
+
+    function updateTimecode() {
+        const timecode = body.querySelector('#imovie-timecode');
+        const totalStr = fmtTime(getTotalDuration());
+        if (timecode) {
+            timecode.textContent = `${fmtTime(state.playheadPos)} / ${totalStr}`;
+        }
+    }
+
+    function updatePreview() {
+        const preview = body.querySelector('#imovie-preview');
+        if (!preview || clips.length === 0) return;
+        let acc = 0;
+        let curIdx = 0;
+        for (let i = 0; i < clips.length; i++) {
+            if (acc + clips[i].duration > state.playheadPos) { curIdx = i; break; }
+            acc += clips[i].duration;
+        }
+        const clip = clips[curIdx];
+        if (clip) {
+            preview.style.background = `linear-gradient(135deg, ${clip.color}, ${clip.color}aa)`;
+        }
+    }
+
+    function stopPlayback() {
+        if (playTimer) { clearInterval(playTimer); playTimer = null; }
+        state.isPlaying = false;
+    }
+
+    function startPlayback() {
+        stopPlayback();
+        const total = getTotalDuration();
+        if (total === 0) {
+            showToast('请先添加片段', 'info');
+            return;
+        }
+        // Reset to start if at end
+        if (state.playheadPos >= total) state.playheadPos = 0;
+        state.isPlaying = true;
+        const step = 0.1; // 100ms steps
+        playTimer = setInterval(() => {
+            state.playheadPos += step;
+            if (state.playheadPos >= total) {
+                state.playheadPos = total;
+                stopPlayback();
+                renderToolbar();
             }
-            render();
+            updatePlayhead();
+            updateTimecode();
+            updatePreview();
+        }, 100);
+    }
+
+    function render() {
+        body.className = 'window-body app-content imovie-app';
+        body.style.display = 'flex';
+        renderToolbar();
+        renderSidebar();
+        renderContent();
+    }
+
+    // Cleanup on window close
+    if (windowId) {
+        const cleanupKey = `imovie_cleanup_${windowId}`;
+        if (window[cleanupKey]) window[cleanupKey]();
+        window[cleanupKey] = () => {
+            if (playTimer) { clearInterval(playTimer); playTimer = null; }
+            state.isPlaying = false;
         };
     }
 
