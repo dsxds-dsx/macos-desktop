@@ -28,6 +28,12 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
     let activeSidebarSection = 'favorites';
     let activeCategoryFilter = null;
     let favorites = JSON.parse(localStorage.getItem('macos_maps_favorites') || '[]');
+    // Remove previously auto-added default favorites (home/work/school) — no longer wanted
+    const oldDefaultIds = ['fav-home', 'fav-work', 'fav-school'];
+    if (favorites.some(f => oldDefaultIds.includes(f.id))) {
+        favorites = favorites.filter(f => !oldDefaultIds.includes(f.id));
+        localStorage.setItem('macos_maps_favorites', JSON.stringify(favorites));
+    }
     let recents = JSON.parse(localStorage.getItem('macos_maps_recents') || '[]');
 
     // ============ Place Categories (macOS-style) ============
@@ -42,17 +48,6 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         { id: 'shop', name: '商场', emoji: '🛍️', color: '#af52de', osm: 'shop=mall' },
         { id: 'attraction', name: '景点', emoji: '📍', color: '#ff6482', osm: 'tourism=attraction' }
     ];
-
-    // ============ Default favorite places ============
-    const defaultFavorites = [
-        { id: 'fav-home', name: '家', address: '北京市朝阳区', lat: 39.9242, lng: 116.4474, category: 'home', emoji: '🏠', addedAt: Date.now() - 86400000 * 30 },
-        { id: 'fav-work', name: '公司', address: '北京市海淀区中关村', lat: 39.9842, lng: 116.3074, category: 'work', emoji: '💼', addedAt: Date.now() - 86400000 * 20 },
-        { id: 'fav-school', name: '清华大学', address: '北京市海淀区清华园1号', lat: 40.0084, lng: 116.3224, category: 'school', emoji: '🎓', addedAt: Date.now() - 86400000 * 10 }
-    ];
-    if (favorites.length === 0) {
-        favorites = defaultFavorites;
-        saveFavorites();
-    }
 
     function saveFavorites() {
         localStorage.setItem('macos_maps_favorites', JSON.stringify(favorites));
@@ -615,10 +610,12 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         const lookLat = lat + (lookAheadMeters / 111000) * Math.cos(bearingRad);
         const lookLng = lng + (lookAheadMeters / (111000 * Math.cos(lat * Math.PI / 180))) * Math.sin(bearingRad);
         map.panTo([lookLat, lookLng], { animate: true, duration: 0.5 });
-        const rotateAngle = -bearing;
-        wrapperEl.style.transform = `rotate(${rotateAngle}deg)`;
-        compassEl.style.transform = `rotate(${-rotateAngle}deg)`;
-        compassEl.style.display = 'flex';
+        // Keep map north-up (no 2D rotation — that skews tiles/labels)
+        // Compass shows bearing info without rotating the map
+        if (compassEl) {
+            compassEl.style.display = 'flex';
+            compassEl.style.transform = `rotate(${-bearing}deg)`;
+        }
         if (routeCoords.length > 0) {
             updateRouteProgress(lat, lng);
         }
@@ -730,7 +727,6 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         body.querySelector('.maps-search-bar').style.opacity = '1';
         body.querySelector('.maps-search-bar').style.pointerEvents = '';
 
-        wrapperEl.style.transform = 'rotate(0deg)';
         compassEl.style.display = 'none';
         compassEl.style.transform = '';
 
@@ -1258,13 +1254,8 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
 
     compassEl.addEventListener('click', () => {
         if (navActive || navMode) {
-            if (wrapperEl.style.transform && wrapperEl.style.transform !== 'rotate(0deg)') {
-                wrapperEl.style.transform = 'rotate(0deg)';
-                compassEl.style.transform = 'rotate(0deg)';
-            } else {
-                wrapperEl.style.transform = `rotate(${-currentBearing}deg)`;
-                compassEl.style.transform = `rotate(${currentBearing}deg)`;
-            }
+            // Reset compass to north-up (just resets the compass indicator, map stays north-up)
+            compassEl.style.transform = 'rotate(0deg)';
         }
     });
 
@@ -1283,12 +1274,7 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         if (window.toast) window.toast('3D 视图已开启', 'info');
     });
     body.querySelector(`#maps-compass-btn-${windowId}`).addEventListener('click', () => {
-        if (wrapperEl.style.transform && wrapperEl.style.transform !== 'rotate(0deg)') {
-            wrapperEl.style.transform = 'rotate(0deg)';
-            compassEl.style.transform = 'rotate(0deg)';
-        } else {
-            map.setView(map.getCenter(), map.getZoom(), { animate: true });
-        }
+        map.setView(map.getCenter(), map.getZoom(), { animate: true });
     });
 
     // Toolbar bindings
