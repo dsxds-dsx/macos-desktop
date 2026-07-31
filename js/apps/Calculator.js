@@ -4,6 +4,9 @@ window.renderCalculator = function(body, sidebar, toolbar, windowId) {
     let previousValue = null;
     let operator = null;
     let waitingForOperand = false;
+    let lastOperator = null;   // for "=" repeat
+    let lastOperand = null;    // for "=" repeat
+    let justEvaluated = false; // true right after "=" — fresh digit starts new calc
     let history = JSON.parse(localStorage.getItem('macos_calc_history') || '[]');
 
     function saveHistory() {
@@ -38,6 +41,17 @@ window.renderCalculator = function(body, sidebar, toolbar, windowId) {
 
     function inputDigit(digit) {
         if (display === '错误') { clear(); return; }
+        // Fresh start after "=": clear the previous expression/history line
+        if (justEvaluated) {
+            display = '0';
+            expression = '';
+            previousValue = null;
+            operator = null;
+            lastOperator = null;
+            lastOperand = null;
+            justEvaluated = false;
+            waitingForOperand = false;
+        }
         if (waitingForOperand) {
             display = digit;
             waitingForOperand = false;
@@ -50,6 +64,18 @@ window.renderCalculator = function(body, sidebar, toolbar, windowId) {
 
     function inputDecimal() {
         if (display === '错误') { clear(); return; }
+        if (justEvaluated) {
+            display = '0.';
+            expression = '';
+            previousValue = null;
+            operator = null;
+            lastOperator = null;
+            lastOperand = null;
+            justEvaluated = false;
+            waitingForOperand = false;
+            render();
+            return;
+        }
         if (waitingForOperand) {
             display = '0.';
             waitingForOperand = false;
@@ -65,6 +91,9 @@ window.renderCalculator = function(body, sidebar, toolbar, windowId) {
         previousValue = null;
         operator = null;
         waitingForOperand = false;
+        lastOperator = null;
+        lastOperand = null;
+        justEvaluated = false;
         render();
     }
 
@@ -76,8 +105,14 @@ window.renderCalculator = function(body, sidebar, toolbar, windowId) {
 
     function percentage() {
         if (display === '错误') return;
-        const value = parseFloat(display) / 100;
-        display = String(parseFloat(value.toFixed(10)));
+        const value = parseFloat(display);
+        // macOS: when an operator is pending, % = previousValue * value/100 (X% of A)
+        if (operator && previousValue !== null && !waitingForOperand) {
+            const pct = previousValue * value / 100;
+            display = String(parseFloat(pct.toFixed(10)));
+        } else {
+            display = String(parseFloat((value / 100).toFixed(10)));
+        }
         render();
     }
 
@@ -93,57 +128,102 @@ window.renderCalculator = function(body, sidebar, toolbar, windowId) {
         render();
     }
 
+    function applyOp(a, op, b) {
+        switch (op) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return b !== 0 ? a / b : null; // null = divide by zero
+            default: return b;
+        }
+    }
+
     function performOperation(nextOperator) {
         if (display === '错误') return;
         const inputValue = parseFloat(display);
         const opSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[nextOperator] || '';
 
-        if (previousValue === null) {
-            previousValue = inputValue;
-            expression = formatDisplay(String(inputValue)) + ' ' + opSymbol;
-        } else if (operator && !waitingForOperand) {
-            const currentValue = previousValue;
-            let result;
-            const prevOpSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[operator];
-
-            switch (operator) {
-                case '+': result = currentValue + inputValue; break;
-                case '-': result = currentValue - inputValue; break;
-                case '*': result = currentValue * inputValue; break;
-                case '/': result = inputValue !== 0 ? currentValue / inputValue : '错误'; break;
-                default: result = inputValue;
-            }
-
-            if (result === '错误') {
-                display = '错误';
-                expression = '错误';
-                previousValue = null;
+        // ===== Equals =====
+        if (nextOperator === '=') {
+            if (operator && !waitingForOperand) {
+                // First equals after A op B
+                const prevOpSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[operator];
+                const result = applyOp(previousValue, operator, inputValue);
+                if (result === null) {
+                    display = '错误'; expression = '错误';
+                    previousValue = null; operator = null; waitingForOperand = true;
+                    render(); return;
+                }
+                expression = `${formatDisplay(String(previousValue))} ${prevOpSymbol} ${formatDisplay(String(inputValue))} =`;
+                history.unshift({ expr: `${formatDisplay(String(previousValue))} ${prevOpSymbol} ${formatDisplay(String(inputValue))}`, result: formatDisplay(String(result)) });
+                saveHistory();
+                lastOperator = operator;
+                lastOperand = inputValue;
+                display = String(parseFloat(result.toFixed(10)));
+                previousValue = result;
                 operator = null;
                 waitingForOperand = true;
-                render();
-                return;
+                justEvaluated = true;
+            } else if (operator && waitingForOperand) {
+                // 5 + = : use previousValue as the operand (5 + 5 = 10)
+                const prevOpSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[operator];
+                const result = applyOp(previousValue, operator, previousValue);
+                if (result === null) {
+                    display = '错误'; expression = '错误';
+                    previousValue = null; operator = null; waitingForOperand = true;
+                    render(); return;
+                }
+                expression = `${formatDisplay(String(previousValue))} ${prevOpSymbol} ${formatDisplay(String(previousValue))} =`;
+                history.unshift({ expr: `${formatDisplay(String(previousValue))} ${prevOpSymbol} ${formatDisplay(String(previousValue))}`, result: formatDisplay(String(result)) });
+                saveHistory();
+                lastOperator = operator;
+                lastOperand = previousValue;
+                display = String(parseFloat(result.toFixed(10)));
+                previousValue = result;
+                operator = null;
+                waitingForOperand = true;
+                justEvaluated = true;
+            } else if (lastOperator != null && lastOperand != null) {
+                // Repeated equals: repeat last operation (display op lastOperand)
+                const prevOpSymbol = { '+': '+', '-': '−', '*': '×', '/': '÷' }[lastOperator];
+                const result = applyOp(inputValue, lastOperator, lastOperand);
+                if (result === null) {
+                    display = '错误'; expression = '错误';
+                    previousValue = null; operator = null; waitingForOperand = true;
+                    render(); return;
+                }
+                expression = `${formatDisplay(String(inputValue))} ${prevOpSymbol} ${formatDisplay(String(lastOperand))} =`;
+                history.unshift({ expr: `${formatDisplay(String(inputValue))} ${prevOpSymbol} ${formatDisplay(String(lastOperand))}`, result: formatDisplay(String(result)) });
+                saveHistory();
+                display = String(parseFloat(result.toFixed(10)));
+                previousValue = result;
+                waitingForOperand = true;
+                justEvaluated = true;
             }
+            // else: no pending op and no last op — ignore "=" entirely
+            render();
+            return;
+        }
 
+        // ===== Non-equals operator (+, -, *, /) =====
+        if (previousValue === null) {
+            previousValue = inputValue;
+        } else if (operator && !waitingForOperand) {
+            // Chained: 5 + 3 +  → apply pending op first
+            const result = applyOp(previousValue, operator, inputValue);
+            if (result === null) {
+                display = '错误'; expression = '错误';
+                previousValue = null; operator = null; waitingForOperand = true;
+                render(); return;
+            }
             display = String(parseFloat(result.toFixed(10)));
             previousValue = result;
-            expression = `${formatDisplay(String(currentValue))} ${prevOpSymbol} ${formatDisplay(String(inputValue))} =`;
-            history.unshift({ expr: `${formatDisplay(String(currentValue))} ${prevOpSymbol} ${formatDisplay(String(inputValue))}`, result: formatDisplay(display) });
-            saveHistory();
         }
-
+        // If justEvaluated, previousValue already holds the result — keep it as left operand
+        operator = nextOperator;
+        expression = `${formatDisplay(String(previousValue))} ${opSymbol}`;
         waitingForOperand = true;
-
-        if (nextOperator === '=') {
-            previousValue = null;
-            operator = null;
-        } else {
-            operator = nextOperator;
-            if (!expression.endsWith('=')) {
-                // expression already set above
-            } else {
-                expression = formatDisplay(display) + ' ' + opSymbol;
-            }
-        }
+        justEvaluated = false;
         render();
     }
 
