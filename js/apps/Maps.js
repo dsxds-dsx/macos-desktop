@@ -606,28 +606,26 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         if (map.getZoom() < navZoom - 1) {
             map.setZoom(navZoom, { animate: true });
         }
-        // Look ahead along the bearing so the upcoming route shows ahead of the user
-        const lookAheadMeters = 80;
+        // Look ahead along the heading so the user marker sits in the lower part
+        // of the screen and the upcoming route fills the upper part (vertical route).
+        const lookAheadMeters = 180;
         const bearingRad = bearing * Math.PI / 180;
         const lookLat = lat + (lookAheadMeters / 111000) * Math.cos(bearingRad);
         const lookLng = lng + (lookAheadMeters / (111000 * Math.cos(lat * Math.PI / 180))) * Math.sin(bearingRad);
         map.panTo([lookLat, lookLng], { animate: true, duration: 0.5 });
-        // Rotate ONLY the map tile/route layer so the heading points up.
-        // Do NOT rotate the wrapper — that would skew the search bar, nav panel, etc.
-        // Respect the navNorthUp toggle (compass click switches between heading-up / north-up)
-        if (!navNorthUp) {
-            if (mapEl) {
-                mapEl.style.transition = 'transform 0.4s ease';
-                mapEl.style.transform = `rotate(${-bearing}deg)`;
-            }
-            if (compassEl) {
-                compassEl.style.display = 'flex';
-                compassEl.style.transition = 'transform 0.4s ease';
-                compassEl.style.transform = `rotate(${-bearing}deg)`;
-            }
-        } else {
-            if (compassEl) compassEl.style.display = 'flex';
+        // Rotate ONLY the map layer so the heading points up — route becomes vertical (丨).
+        // The wrapper is NOT rotated, so search bar / nav panel stay upright.
+        if (!navNorthUp && mapEl) {
+            mapEl.style.transition = 'transform 0.4s ease';
+            mapEl.style.transform = `rotate(${-bearing}deg)`;
         }
+        if (compassEl) {
+            compassEl.style.display = 'flex';
+            compassEl.style.transition = 'transform 0.4s ease';
+            compassEl.style.transform = navNorthUp ? 'rotate(0deg)' : `rotate(${-bearing}deg)`;
+        }
+        // Force the dart-shaped marker during navigation (not the water drop).
+        addUserMarker(lat, lng, bearing);
         if (routeCoords.length > 0) {
             updateRouteProgress(lat, lng);
         }
@@ -722,9 +720,17 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
 
         if (routeCoords.length >= 2) {
             routeStartBearing = calculateBearing(routeCoords[0][0], routeCoords[0][1], routeCoords[Math.min(5, routeCoords.length-1)][0], routeCoords[Math.min(5, routeCoords.length-1)][1]);
+            currentBearing = routeStartBearing;
+            // Immediately rebuild the marker as a dart and rotate the map so the
+            // route stands up vertically — don't wait for the first GPS callback.
             if (userMarker) {
                 const uc = userMarker.getLatLng();
+                addUserMarker(uc.lat, uc.lng, routeStartBearing);
                 updateNavigationView(uc.lat, uc.lng, routeStartBearing, 0);
+            } else if (userWgs84Lat != null) {
+                const [gLng, gLat] = wgs84ToGcj02(userWgs84Lng, userWgs84Lat);
+                addUserMarker(gLat, gLng, routeStartBearing);
+                updateNavigationView(gLat, gLng, routeStartBearing, 0);
             }
         }
 
@@ -748,6 +754,13 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         }
         compassEl.style.display = 'none';
         compassEl.style.transform = '';
+
+        // Restore the water-drop marker now that navigation is over
+        if (userMarker) {
+            const ll = userMarker.getLatLng();
+            userMarker.setIcon(createWaterDropIcon());
+            userMarker.setLatLng(ll);
+        }
 
         map.dragging.enable();
         map.touchZoom.enable();
