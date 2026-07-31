@@ -10546,9 +10546,12 @@
 
 .maps-map {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    /* Oversize so rotation never exposes empty corners at the wrapper edges */
+    width: 140%;
+    height: 140%;
+    top: -20%;
+    left: -20%;
+    transform-origin: center center;
 }
 
 .maps-toolbar {

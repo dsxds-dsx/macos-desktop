@@ -14,6 +14,7 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
     let watchId = null;
     let navMode = false;
     let navActive = false;
+    let navNorthUp = false; // when true, map stays north-up instead of heading-up
     let currentBearing = 0;
     let deviceHeading = null;
     let lastPositions = [];
@@ -605,16 +606,27 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         if (map.getZoom() < navZoom - 1) {
             map.setZoom(navZoom, { animate: true });
         }
+        // Look ahead along the bearing so the upcoming route shows ahead of the user
         const lookAheadMeters = 80;
         const bearingRad = bearing * Math.PI / 180;
         const lookLat = lat + (lookAheadMeters / 111000) * Math.cos(bearingRad);
         const lookLng = lng + (lookAheadMeters / (111000 * Math.cos(lat * Math.PI / 180))) * Math.sin(bearingRad);
         map.panTo([lookLat, lookLng], { animate: true, duration: 0.5 });
-        // Keep map north-up (no 2D rotation — that skews tiles/labels)
-        // Compass shows bearing info without rotating the map
-        if (compassEl) {
-            compassEl.style.display = 'flex';
-            compassEl.style.transform = `rotate(${-bearing}deg)`;
+        // Rotate ONLY the map tile/route layer so the heading points up.
+        // Do NOT rotate the wrapper — that would skew the search bar, nav panel, etc.
+        // Respect the navNorthUp toggle (compass click switches between heading-up / north-up)
+        if (!navNorthUp) {
+            if (mapEl) {
+                mapEl.style.transition = 'transform 0.4s ease';
+                mapEl.style.transform = `rotate(${-bearing}deg)`;
+            }
+            if (compassEl) {
+                compassEl.style.display = 'flex';
+                compassEl.style.transition = 'transform 0.4s ease';
+                compassEl.style.transform = `rotate(${-bearing}deg)`;
+            }
+        } else {
+            if (compassEl) compassEl.style.display = 'flex';
         }
         if (routeCoords.length > 0) {
             updateRouteProgress(lat, lng);
@@ -686,6 +698,7 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
     function startNavigation() {
         navActive = true;
         navMode = true;
+        navNorthUp = false; // default: heading-up (route points up the screen)
         navOverlay.style.display = 'block';
         placeCard.style.display = 'none';
         directionsPanel.style.display = 'none';
@@ -722,11 +735,17 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
     function exitNavigation() {
         navActive = false;
         navMode = false;
+        navNorthUp = false;
         navOverlay.style.display = 'none';
         placeCard.style.display = 'none';
         body.querySelector('.maps-search-bar').style.opacity = '1';
         body.querySelector('.maps-search-bar').style.pointerEvents = '';
 
+        // Reset map rotation back to north-up
+        if (mapEl) {
+            mapEl.style.transition = 'transform 0.4s ease';
+            mapEl.style.transform = 'rotate(0deg)';
+        }
         compassEl.style.display = 'none';
         compassEl.style.transform = '';
 
@@ -1254,8 +1273,16 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
 
     compassEl.addEventListener('click', () => {
         if (navActive || navMode) {
-            // Reset compass to north-up (just resets the compass indicator, map stays north-up)
-            compassEl.style.transform = 'rotate(0deg)';
+            navNorthUp = !navNorthUp;
+            if (navNorthUp) {
+                // Switch to north-up
+                if (mapEl) mapEl.style.transform = 'rotate(0deg)';
+                compassEl.style.transform = 'rotate(0deg)';
+            } else {
+                // Switch back to heading-up
+                if (mapEl) mapEl.style.transform = `rotate(${-currentBearing}deg)`;
+                compassEl.style.transform = `rotate(${-currentBearing}deg)`;
+            }
         }
     });
 
