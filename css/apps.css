@@ -10695,6 +10695,7 @@
     width: 40px;
     height: 56px;
     transition: transform 0.25s ease-out;
+    transform-origin: 50% 78.5%;
 }
 
 .maps-triangle-shape {

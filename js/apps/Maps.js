@@ -6,6 +6,7 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
     let currentLayer = 'standard';
     let markers = [];
     let routeLine = null;
+    let routeCasing = null;
     let routeCoords = [];
     let userMarker = null;
     let selectedPlace = null;
@@ -497,8 +498,12 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
         if (routeLine) {
             map.removeLayer(routeLine);
             routeLine = null;
-            routeCoords = [];
         }
+        if (routeCasing) {
+            map.removeLayer(routeCasing);
+            routeCasing = null;
+        }
+        routeCoords = [];
     }
 
     function createTriangleIcon(bearing) {
@@ -994,10 +999,20 @@ window.renderMaps = function(body, sidebar, toolbar, windowId) {
                 });
 
                 if (routeLine) map.removeLayer(routeLine);
+                if (routeCasing) map.removeLayer(routeCasing);
+                // White casing (outer, thicker) — macOS style
+                routeCasing = L.polyline(routeCoords, {
+                    color: '#ffffff',
+                    weight: 11,
+                    opacity: 1,
+                    lineCap: 'round',
+                    lineJoin: 'round'
+                }).addTo(map);
+                // Blue main line (inner)
                 routeLine = L.polyline(routeCoords, {
                     color: '#007aff',
-                    weight: 6,
-                    opacity: 0.85,
+                    weight: 7,
+                    opacity: 0.95,
                     lineCap: 'round',
                     lineJoin: 'round'
                 }).addTo(map);
