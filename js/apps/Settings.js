@@ -258,7 +258,62 @@ window.renderSettings = function(body, sidebar, toolbar, windowId) {
                     </div>
                 </div>
             `;
-        } else if (currentTab === 'appearance' || currentTab === 'general') {
+        } else if (currentTab === 'general') {
+            html = `
+                <h2 class="settings-page-title">通用</h2>
+                <div class="settings-card">
+                    <div class="settings-row" style="cursor:default;">
+                        <span class="settings-label">关于</span>
+                        <span class="settings-value" style="color:var(--text-tertiary);">macOS Sonoma 14.5</span>
+                    </div>
+                    <div class="settings-row" style="cursor:default;">
+                        <span class="settings-label">芯片</span>
+                        <span class="settings-value" style="color:var(--text-tertiary);">Apple M3 Pro</span>
+                    </div>
+                    <div class="settings-row" style="cursor:default;">
+                        <span class="settings-label">内存</span>
+                        <span class="settings-value" style="color:var(--text-tertiary);">18 GB</span>
+                    </div>
+                    <div class="settings-row last" style="cursor:default;">
+                        <span class="settings-label">序列号</span>
+                        <span class="settings-value" style="color:var(--text-tertiary);">C02XK1TZLZG7</span>
+                    </div>
+                </div>
+                <div class="settings-section-header">软件更新</div>
+                <div class="settings-card">
+                    <div class="settings-row last">
+                        <span class="settings-label">自动更新</span>
+                        <div class="toggle-switch ${settings.autoUpdate !== false ? 'active' : ''}" data-toggle="autoUpdate"></div>
+                    </div>
+                </div>
+                <div class="settings-section-header">默认网页浏览器</div>
+                <div class="settings-card">
+                    <div class="settings-row last">
+                        <span class="settings-label">默认浏览器</span>
+                        <select class="settings-select" id="default-browser-select">
+                            <option ${!settings.defaultBrowser || settings.defaultBrowser === 'safari' ? 'selected' : ''} value="safari">Safari</option>
+                            <option ${settings.defaultBrowser === 'chrome' ? 'selected' : ''} value="chrome">Chrome</option>
+                            <option ${settings.defaultBrowser === 'firefox' ? 'selected' : ''} value="firefox">Firefox</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="settings-section-header">存储空间</div>
+                <div class="settings-card">
+                    <div class="settings-row last" style="flex-direction:column;align-items:stretch;gap:8px;">
+                        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-tertiary);">
+                            <span>已使用 312 GB</span>
+                            <span>剩余 488 GB</span>
+                        </div>
+                        <div style="height:8px;background:var(--input-bg);border-radius:4px;overflow:hidden;display:flex;">
+                            <div style="width:31%;background:#0a84ff;"></div>
+                            <div style="width:12%;background:#34c759;"></div>
+                            <div style="width:8%;background:#ff9500;"></div>
+                            <div style="width:5%;background:#ff453a;"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else if (currentTab === 'appearance') {
             html = `
                 <h2 class="settings-page-title">外观</h2>
                 <div class="settings-card">
@@ -283,11 +338,11 @@ window.renderSettings = function(body, sidebar, toolbar, windowId) {
                 <div class="settings-section-header">强调色</div>
                 <div class="settings-card">
                     <div class="settings-row last">
-                        <span class="settings-label">蓝色</span>
+                        <span class="settings-label">${settings.accent === 'purple' ? '紫色' : settings.accent === 'graphite' ? '石墨色' : '蓝色'}</span>
                         <div class="seg-control" data-seg="accent">
-                            <button class="seg-control-btn active" data-value="blue">蓝色</button>
-                            <button class="seg-control-btn" data-value="purple">紫色</button>
-                            <button class="seg-control-btn" data-value="graphite">石墨色</button>
+                            <button class="seg-control-btn ${(!settings.accent || settings.accent === 'blue') ? 'active' : ''}" data-value="blue">蓝色</button>
+                            <button class="seg-control-btn ${settings.accent === 'purple' ? 'active' : ''}" data-value="purple">紫色</button>
+                            <button class="seg-control-btn ${settings.accent === 'graphite' ? 'active' : ''}" data-value="graphite">石墨色</button>
                         </div>
                     </div>
                 </div>
@@ -368,9 +423,9 @@ window.renderSettings = function(body, sidebar, toolbar, windowId) {
                     <div class="settings-row">
                         <span class="settings-label">主音量</span>
                         <div class="settings-row-control">
-                            <span class="settings-volume-icon">🔈</span>
+                            <span class="settings-volume-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12z"/></svg></span>
                             <input type="range" class="macos-slider" min="0" max="100" value="60">
-                            <span class="settings-volume-icon">🔊</span>
+                            <span class="settings-volume-icon"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3a4.5 4.5 0 0 0-2.5-4.03v8.05A4.5 4.5 0 0 0 16.5 12zm4-2.5v5l-2-1.5v-2l2-1.5zM18.5 8v8l3-2.5v-3l-3-2.5z"/></svg></span>
                         </div>
                     </div>
                     <div class="settings-row last">

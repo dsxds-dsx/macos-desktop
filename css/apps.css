@@ -13402,6 +13402,18 @@
     font-size: 13px;
 }
 
+.finder-status-bar {
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 0.5px solid var(--border-color);
+    background: var(--window-header);
+    font-size: 11px;
+    color: var(--text-tertiary);
+}
+
 .finder-list-header {
     display: grid;
     grid-template-columns: 2fr 1.4fr 110px 110px;

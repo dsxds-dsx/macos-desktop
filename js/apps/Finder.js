@@ -6,6 +6,23 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
     let history = ['/Documents'];
     let historyIndex = 0;
 
+    function formatFileSize(bytes) {
+        if (!bytes) return '--';
+        if (bytes < 1024) return bytes + ' 字节';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        if (bytes < 1024 * 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        return (bytes / (1024 * 1024 * 1024)).toFixed(1) + ' GB';
+    }
+    function fileIconFor(item) {
+        if (item.type === 'folder') return 'folder';
+        const name = (item.name || '').toLowerCase();
+        if (/\.(png|jpe?g|gif|svg|heic)$/.test(name)) return 'pictures';
+        if (/\.(mp4|mov|m4v)$/.test(name)) return 'movies';
+        if (/\.(mp3|m4a|wav|aac)$/.test(name)) return 'music';
+        if (/\.(pdf)$/.test(name)) return 'documents';
+        return 'notes';
+    }
+
     const sf = {
         // SF Symbol-style strokes
         applications: `<svg viewBox="0 0 16 16" width="14" height="14"><rect x="1.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="#5ac8fa" stroke-width="1.1"/><circle cx="6" cy="6" r="1.4" fill="#5ac8fa"/><circle cx="10" cy="6" r="1.4" fill="#ff9500"/><circle cx="6" cy="10" r="1.4" fill="#ff3b30"/><circle cx="10" cy="10" r="1.4" fill="#34c759"/></svg>`,
@@ -203,11 +220,12 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
                     ${items.length === 0 ? '<div class="finder-empty">此文件夹为空</div>' : ''}
                     ${items.map(item => `
                         <div class="finder-grid-item ${selectedPath === item.path ? 'selected' : ''}" data-path="${item.path}" data-type="${item.type}">
-                            <div class="finder-grid-icon">${IconGenerator.generate(item.type === 'folder' ? 'folder' : 'notes', { size: 64 })}</div>
+                            <div class="finder-grid-icon">${IconGenerator.generate(fileIconFor(item), { size: 64 })}</div>
                             <div class="finder-grid-name">${item.name}</div>
                         </div>
                     `).join('')}
                 </div>
+                <div class="finder-status-bar">${items.length} 个项目</div>
             `;
         } else {
             body.innerHTML = `
@@ -222,15 +240,16 @@ window.renderFinder = function(body, sidebar, toolbar, windowId) {
                     ${items.map(item => `
                         <div class="finder-list-item ${selectedPath === item.path ? 'selected' : ''}" data-path="${item.path}" data-type="${item.type}">
                             <div class="finder-list-cell name">
-                                <div class="finder-list-icon">${IconGenerator.generate(item.type === 'folder' ? 'folder' : 'notes', { size: 20 })}</div>
+                                <div class="finder-list-icon">${IconGenerator.generate(fileIconFor(item), { size: 20 })}</div>
                                 <span>${item.name}</span>
                             </div>
                             <div class="finder-list-cell date">${item.modified ? new Date(item.modified).toLocaleDateString('zh-CN') : '--'}</div>
-                            <div class="finder-list-cell size">${item.type === 'folder' ? '--' : (item.content ? item.content.length + ' 字节' : '--')}</div>
+                            <div class="finder-list-cell size">${item.type === 'folder' ? '--' : formatFileSize(item.content ? item.content.length : 0)}</div>
                             <div class="finder-list-cell type">${item.type === 'folder' ? '文件夹' : '文稿'}</div>
                         </div>
                     `).join('')}
                 </div>
+                <div class="finder-status-bar">${items.length} 个项目</div>
             `;
         }
 
