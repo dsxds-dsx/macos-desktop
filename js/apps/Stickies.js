@@ -84,9 +84,10 @@ window.renderStickies = function(body, sidebar, toolbar, windowId) {
                 </div>
             </div>
         `;
-        toolbar.querySelector('#sticky-delete')?.addEventListener('click', () => {
+        toolbar.querySelector('#sticky-delete')?.addEventListener('click', async () => {
             if (!note) return;
-            if (confirm('确定要删除此便签吗？')) {
+            const ok = await window.showConfirm('确定要删除此便签吗？');
+            if (ok) {
                 notes = notes.filter(n => n.id !== currentNoteId);
                 currentNoteId = notes[0]?.id || null;
                 saveNotes();

@@ -195,10 +195,13 @@ window.renderTV = function(body, sidebar, toolbar, windowId) {
     function renderBrowse() {
         const list = getFilteredShows();
         if (list.length === 0) {
+            const emptyIcon = searchQuery.trim()
+                ? '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>'
+                : '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M8 21h8M12 18v3"/></svg>';
             body.innerHTML = `
                 <div class="tv-content">
                     <div class="tv-empty">
-                        <div class="tv-empty-icon">${searchQuery.trim() ? '🔍' : '📺'}</div>
+                        <div class="tv-empty-icon">${emptyIcon}</div>
                         <div class="tv-empty-text">${searchQuery.trim() ? '未找到相关内容' : '暂无内容'}</div>
                     </div>
                 </div>

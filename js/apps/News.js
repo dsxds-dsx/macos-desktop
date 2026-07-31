@@ -85,14 +85,23 @@ window.renderNews = function(body, sidebar, toolbar, windowId) {
             'chip': 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
             'space': 'linear-gradient(135deg, #8EC5FC 0%, #E0C3FC 100%)'
         };
+        // SVG hero icons (macOS Sonoma style — line icons, white stroke)
         const icons = {
-            'macos-sonoma': '', 'ai-trend': '🤖', 'winter-sports': '⛷️', 'cinema': '🎬',
-            'spring-health': '🌸', 'climate': '🌍', 'finance': '📈', 'planet': '🪐',
-            'chip': '💾', 'space': '🚀'
+            'macos-sonoma': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 2.5a3.5 3.5 0 0 0-3.5 3.5c0 .4 0 .8.1 1.2"/><path d="M11 6.5a3.5 3.5 0 1 0-4 4"/><path d="M3 13c2-1 4-1.5 6-1.5"/><path d="M9 14.5c1.5-1 3.5-1.5 6-1.5"/><path d="M14.5 18c1.5-1 3-1.5 5-1.5"/><path d="M5 18c2 0 3.5-1 5-1"/><path d="M14.5 11a3 3 0 1 0 4.5-2.6"/></svg>',
+            'ai-trend': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="6" width="16" height="13" rx="3"/><circle cx="9" cy="11" r="1.2" fill="currentColor"/><circle cx="15" cy="11" r="1.2" fill="currentColor"/><path d="M9 15h6"/><path d="M12 3v3M9 3h6"/></svg>',
+            'winter-sports': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l14 10M19 7L5 17"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/></svg>',
+            'cinema': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 8h18M3 14h18M8 4v14M16 4v14"/><path d="M3 18l3 3M21 18l-3 3"/></svg>',
+            'spring-health': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-3 3-3 7 0 10 3-3 3-7 0-10z"/><path d="M12 13c-4 1-6 4-6 8h12c0-4-2-7-6-8z"/><path d="M12 13v8"/></svg>',
+            'climate': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.5 4 5.5 4 9s-1.5 6.5-4 9c-2.5-2.5-4-5.5-4-9s1.5-6.5 4-9z"/></svg>',
+            'finance': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/><circle cx="7" cy="14" r="1" fill="currentColor"/><circle cx="11" cy="10" r="1" fill="currentColor"/><circle cx="15" cy="14" r="1" fill="currentColor"/><circle cx="20" cy="8" r="1" fill="currentColor"/></svg>',
+            'planet': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><ellipse cx="12" cy="12" rx="11" ry="4" transform="rotate(-25 12 12)"/><circle cx="9" cy="11" r="0.8" fill="currentColor"/><circle cx="14" cy="13" r="0.8" fill="currentColor"/></svg>',
+            'chip': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9" y="9" width="6" height="6" rx="1"/><path d="M9 3v3M12 3v3M15 3v3M9 18v3M12 18v3M15 18v3M3 9h3M3 12h3M3 15h3M18 9h3M18 12h3M18 15h3"/></svg>',
+            'space': '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-2-2-2-5 0-7s5-2 7 0M14 6.5c-1.5 0-2.5 1.5-2.5 3.5s1 4 3 4.5"/><path d="M9 9.5L4.5 5M14 6.5L9.5 2M14 14.5L9.5 19"/><circle cx="18" cy="6" r="1.5" fill="currentColor"/><circle cx="6" cy="18" r="1.5" fill="currentColor"/><path d="M8 12l3 2M14 7l-3 2"/></svg>'
         };
+        const fallbackIcon = '<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a2 2 0 0 1 2 2v14l-3-2-2 2-2-2-2 2-2-2-3 2V6a2 2 0 0 1 2-2z"/><path d="M8 8h6M8 11h6M8 14h4"/></svg>';
         return {
             gradient: gradients[article.image] || 'linear-gradient(135deg, #667eea, #764ba2)',
-            icon: icons[article.image] || '📰'
+            icon: icons[article.image] || fallbackIcon
         };
     }
 
@@ -195,9 +204,12 @@ window.renderNews = function(body, sidebar, toolbar, windowId) {
         const title = titles[state.currentChannel] || (channelInfo ? channelInfo.name : '新闻');
 
         if (list.length === 0) {
+            const emptyIcon = state.currentChannel === 'saved'
+                ? '<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>'
+                : '<svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>';
             body.innerHTML = `
                 <div class="news-content news-content-empty">
-                    <div class="news-empty-icon">${state.currentChannel === 'saved' ? '🔖' : '🔍'}</div>
+                    <div class="news-empty-icon">${emptyIcon}</div>
                     <div class="news-empty-title">${state.currentChannel === 'saved' ? '还没有保存的文章' : (searchQuery ? '未找到相关文章' : '暂无文章')}</div>
                     <div class="news-empty-desc">${state.currentChannel === 'saved' ? '阅读文章时点击保存按钮，稍后在此查看' : '试试其他关键词或频道'}</div>
                 </div>

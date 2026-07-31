@@ -51,8 +51,8 @@ class AppManager {
             { id: 'chess', name: '国际象棋', icon: 'chess', width: 500, height: 500 },
             { id: 'dictionary', name: '词典', icon: 'dictionary', width: 600, height: 500 },
             { id: 'fontbook', name: '字体册', icon: 'fontbook', width: 700, height: 500 },
-            { id: 'imagecapture', name: '图像捕捉', icon: 'imagecapture', width: 600, height: 400 },
-            { id: 'keychain', name: '钥匙串访问', icon: 'keychain', width: 600, height: 450 },
+            { id: 'imagecapture', name: '图像捕捉', icon: 'imagecapture', width: 820, height: 560 },
+            { id: 'keychain', name: '钥匙串访问', icon: 'keychain', width: 820, height: 560 },
             { id: 'migration', name: '迁移助理', icon: 'migration', width: 600, height: 400 },
             { id: 'sysinfo', name: '系统信息', icon: 'sysinfo', width: 700, height: 500 },
             { id: 'home', name: '家庭', icon: 'home', width: 700, height: 500 },
@@ -63,7 +63,7 @@ class AppManager {
             { id: 'imovie', name: 'iMovie 剪辑', icon: 'imovie', width: 900, height: 600, emoji: '🎬' },
             // 新增应用
             { id: 'passwords', name: '密码', icon: 'passwords', width: 800, height: 600 },
-            { id: 'journal', name: '日记', icon: 'journal', width: 800, height: 600 },
+            { id: 'journal', name: '日记', icon: 'journal', width: 980, height: 680 },
             { id: 'testflight', name: 'TestFlight', icon: 'testflight', width: 700, height: 500 },
             { id: 'phone', name: '电话', icon: 'phone', width: 500, height: 600 },
             { id: 'iphonemirror', name: 'iPhone 镜像', icon: 'iphonemirror', width: 600, height: 700 },
@@ -600,11 +600,11 @@ class AppManager {
     }
 
     hasToolbar(appId) {
-        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies', 'photos', 'calendar', 'weather', 'stocks', 'news', 'tv', 'contacts', 'books', 'appstore', 'podcasts'].includes(appId);
+        return ['finder', 'safari', 'notes', 'mail', 'settings', 'ai', 'maps', 'music', 'clock', 'reminders', 'textedit', 'stickies', 'photos', 'calendar', 'weather', 'stocks', 'news', 'tv', 'contacts', 'books', 'appstore', 'podcasts', 'journal', 'tips', 'testflight', 'voicememos', 'findmy', 'shortcuts', 'freeform', 'passwords', 'gamecenter', 'dictionary', 'fontbook', 'sysinfo', 'activity', 'keychain', 'imagecapture'].includes(appId);
     }
 
     hasSidebar(appId) {
-        return ['finder', 'notes', 'mail', 'messages', 'settings', 'music', 'contacts', 'ai', 'reminders', 'textedit', 'photos', 'calendar', 'weather', 'stocks', 'podcasts', 'maps', 'news', 'books', 'tv', 'appstore'].includes(appId);
+        return ['finder', 'notes', 'mail', 'messages', 'settings', 'music', 'contacts', 'ai', 'reminders', 'textedit', 'photos', 'calendar', 'weather', 'stocks', 'podcasts', 'maps', 'news', 'books', 'tv', 'appstore', 'journal', 'tips', 'testflight', 'voicememos', 'findmy', 'shortcuts', 'freeform', 'passwords', 'gamecenter', 'dictionary', 'fontbook', 'sysinfo', 'activity', 'keychain', 'imagecapture'].includes(appId);
     }
 
     renderApp(windowId, appId) {

@@ -771,8 +771,9 @@ window.renderMusic = function(body, sidebar, toolbar, windowId) {
         container.querySelector('#m-edit-pl')?.addEventListener('click', () => {
             openPlaylistEditor(playlist);
         });
-        container.querySelector('#m-del-pl')?.addEventListener('click', () => {
-            if (confirm(`确定要删除播放列表 "${playlist.name}" 吗？`)) {
+        container.querySelector('#m-del-pl')?.addEventListener('click', async () => {
+            const ok = await window.showConfirm(`确定要删除播放列表 "${playlist.name}" 吗？`);
+            if (ok) {
                 library.playlists = library.playlists.filter(p => p.id !== playlist.id);
                 state.selectedPlaylistId = null;
                 state.currentView = 'library_songs';

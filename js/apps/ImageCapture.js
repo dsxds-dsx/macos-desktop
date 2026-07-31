@@ -1,140 +1,320 @@
+// Image Capture - 图像捕捉 (macOS Sonoma)
 window.renderImageCapture = function(body, sidebar, toolbar, windowId) {
-    const content = body;
-    content.innerHTML = '';
-    content.style.background = '#1a1a1a';
-    content.style.display = 'flex';
-    content.style.flexDirection = 'column';
+    const STORAGE_KEY = 'macos_imagecapture_v2';
 
-    let devices = [
-        { id: 1, name: 'FaceTime 高清摄像头', type: 'camera', connected: true, icon: '📷' },
-        { id: 2, name: 'iPhone 15 Pro', type: 'camera', connected: true, icon: '📱' },
-        { id: 3, name: '扫描仪', type: 'scanner', connected: false, icon: '🖨️' },
-        { id: 4, name: 'SD 卡', type: 'storage', connected: true, icon: '💳' }
+    const devices = [
+        { id: 1, name: 'FaceTime 高清摄像头', type: 'camera', connected: true, icon: 'camera' },
+        { id: 2, name: 'iPhone 15 Pro', type: 'camera', connected: true, icon: 'phone' },
+        { id: 3, name: 'Canon 扫描仪', type: 'scanner', connected: false, icon: 'scanner' },
+        { id: 4, name: 'SD 卡', type: 'storage', connected: true, icon: 'card' }
     ];
 
-    let capturedImages = JSON.parse(localStorage.getItem('imagecapture_images') || JSON.stringify([
-        { id: 1, name: 'IMG_001.jpg', date: Date.now() - 86400000, size: '2.4 MB', thumb: '🏔️' },
-        { id: 2, name: 'IMG_002.jpg', date: Date.now() - 86000000, size: '1.8 MB', thumb: '🌅' },
-        { id: 3, name: 'IMG_003.jpg', date: Date.now() - 85000000, size: '3.1 MB', thumb: '🌸' },
-        { id: 4, name: 'IMG_004.jpg', date: Date.now() - 84000000, size: '2.0 MB', thumb: '🏙️' }
-    ]));
+    const palettes = [
+        ['#FF6B6B', '#FFA500', '#FFD93D'],
+        ['#4A90E2', '#5DADE2', '#85C1E9'],
+        ['#52C41A', '#73D13D', '#95DE64'],
+        ['#AF52DE', '#B37FEB', '#D3ADF7'],
+        ['#FA541C', '#FF7A45', '#FF9C6E'],
+        ['#13C2C2', '#36CFC9', '#5CDBD3'],
+        ['#EB2F96', '#F759AB', '#FF85C0'],
+        ['#FAAD14', '#FFC53D', '#FFD666'],
+        ['#1890FF', '#40A9FF', '#69C0FF'],
+        ['#722ED1', '#9254DE', '#B37FEB']
+    ];
 
-    let isCapturing = false;
-    let selectedDevice = devices[0];
-    let selectedImage = null;
-
-    function save() {
-        localStorage.setItem('imagecapture_images', JSON.stringify(capturedImages));
+    function defaultImages() {
+        return [
+            { id: 1, name: 'IMG_0001.jpg', date: Date.now() - 86400000, size: '2.4 MB', palette: 0, w: 4032, h: 3024 },
+            { id: 2, name: 'IMG_0002.jpg', date: Date.now() - 86000000, size: '1.8 MB', palette: 1, w: 4032, h: 3024 },
+            { id: 3, name: 'IMG_0003.jpg', date: Date.now() - 85000000, size: '3.1 MB', palette: 4, w: 4032, h: 3024 },
+            { id: 4, name: 'IMG_0004.jpg', date: Date.now() - 84000000, size: '2.0 MB', palette: 6, w: 4032, h: 3024 },
+            { id: 5, name: 'IMG_0005.jpg', date: Date.now() - 83000000, size: '2.7 MB', palette: 8, w: 4032, h: 3024 }
+        ];
     }
 
-    function render() {
-        content.innerHTML = `
-            <div style="height:48px;background:linear-gradient(180deg,#2d2d2d,#252525);border-bottom:1px solid #444;display:flex;align-items:center;padding:0 16px;gap:12px;">
-                <select id="ic-deviceSelect" style="padding:6px 12px;background:#3d3d3d;border:1px solid #555;border-radius:6px;color:#fff;font-size:12px;min-width:200px;">
-                    ${devices.map(d => `<option value="${d.id}" ${d.id === selectedDevice.id ? 'selected' : ''} ${!d.connected ? 'disabled' : ''}>${d.icon} ${d.name} ${d.connected ? '' : '(未连接)'}</option>`).join('')}
-                </select>
-                <div style="flex:1;"></div>
-                <button id="ic-importAll" style="padding:6px 16px;background:var(--accent-blue);border:none;border-radius:6px;color:#fff;cursor:pointer;font-size:12px;">全部导入</button>
-            </div>
-            <div style="display:flex;flex:1;overflow:hidden;">
-                <div style="width:220px;background:#252525;border-right:1px solid #333;display:flex;flex-direction:column;">
-                    <div style="padding:12px;border-bottom:1px solid #333;">
-                        <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:0 0 10px;">设备</h4>
-                        <div id="ic-deviceList"></div>
-                    </div>
-                    <div style="padding:12px;border-bottom:1px solid #333;">
-                        <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:0 0 10px;">导入到</h4>
-                        <select style="width:100%;padding:6px;background:#3d3d3d;border:1px solid #555;border-radius:4px;color:#fff;font-size:12px;">
-                            <option>图片</option><option>桌面</option><option>下载</option>
-                        </select>
-                    </div>
-                    <div style="padding:12px;">
-                        <h4 style="color:#999;font-size:11px;text-transform:uppercase;margin:0 0 10px;">删除后</h4>
-                        <label style="display:flex;align-items:center;gap:8px;color:#ccc;font-size:12px;cursor:pointer;">
-                            <input type="checkbox" checked> 保留项目
-                        </label>
-                    </div>
-                </div>
-                <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
-                    <div style="height:280px;background:#000;display:flex;align-items:center;justify-content:center;position:relative;">
-                        <div style="font-size:80px;${isCapturing ? 'animation: pulse 1s infinite;' : ''}" id="ic-preview">${selectedDevice.icon}</div>
-                        ${isCapturing ? '<div style="position:absolute;top:16px;left:16px;background:#ff3b30;color:#fff;padding:4px 12px;border-radius:4px;font-size:11px;display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:#fff;animation:blink 1s infinite;"></span>录制中</div>' : ''}
-                        <div style="position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:12px;">
-                            <button id="ic-capture" style="width:56px;height:56px;border-radius:50%;border:4px solid #fff;background:${isCapturing ? '#ff3b30' : '#fff'};cursor:pointer;transition:all 0.2s;"></button>
+    function defaultData() {
+        return {
+            selectedDeviceId: 1,
+            selectedImageId: null,
+            importTo: 'pictures',
+            deleteAfter: false,
+            isCapturing: false
+        };
+    }
+
+    let images = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || defaultImages();
+    let data = JSON.parse(localStorage.getItem(STORAGE_KEY + '_state') || 'null') || defaultData();
+    let captureTimer = null;
+
+    function save() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(images));
+        localStorage.setItem(STORAGE_KEY + '_state', JSON.stringify(data));
+    }
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function showToast(text) {
+        if (window.Toast) window.Toast.show(text);
+        else if (window.toast) window.toast(text);
+    }
+    function fmtDate(ts) {
+        const d = new Date(ts);
+        return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function deviceIcon(icon) {
+        const icons = {
+            camera: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+            phone: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+            scanner: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M7 7h10M7 17h6"/></svg>',
+            card: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M2 11h20M7 15h4"/></svg>'
+        };
+        return icons[icon] || icons.camera;
+    }
+
+    function selectedDevice() {
+        return devices.find(d => d.id === data.selectedDeviceId) || devices[0];
+    }
+
+    function renderSidebar() {
+        if (!sidebar) return;
+        sidebar.innerHTML = `
+            <div class="ic-sidebar">
+                <div class="ic-sidebar-section">
+                    <div class="ic-sidebar-label">设备</div>
+                    ${devices.map(d => `
+                        <div class="ic-device ${d.id === data.selectedDeviceId ? 'active' : ''} ${!d.connected ? 'disabled' : ''}" data-dev="${d.id}">
+                            <span class="ic-dev-icon">${deviceIcon(d.icon)}</span>
+                            <span class="ic-dev-info">
+                                <span class="ic-dev-name">${escapeHtml(d.name)}</span>
+                                <span class="ic-dev-type">${d.type === 'camera' ? '相机' : d.type === 'scanner' ? '扫描仪' : '存储设备'}</span>
+                            </span>
+                            <span class="ic-dev-status ${d.connected ? 'on' : 'off'}"></span>
                         </div>
-                    </div>
-                    <div style="height:40px;background:#2a2a2a;border-bottom:1px solid #333;display:flex;align-items:center;padding:0 16px;">
-                        <span style="color:#999;font-size:12px;">${capturedImages.length} 个项目</span>
-                        <div style="flex:1;"></div>
-                        <button id="ic-delete" style="padding:4px 12px;background:#333;border:1px solid #555;border-radius:4px;color:#ff3b30;cursor:pointer;font-size:11px;${!selectedImage ? 'opacity:0.5;pointer-events:none;' : ''}">删除</button>
-                    </div>
-                    <div style="flex:1;overflow-y:auto;padding:16px;background:#1e1e1e;">
-                        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;" id="ic-grid"></div>
+                    `).join('')}
+                </div>
+                <div class="ic-sidebar-section">
+                    <div class="ic-sidebar-label">导入到</div>
+                    <select id="ic-importTo" class="ic-select">
+                        <option value="pictures" ${data.importTo === 'pictures' ? 'selected' : ''}>图片</option>
+                        <option value="desktop" ${data.importTo === 'desktop' ? 'selected' : ''}>桌面</option>
+                        <option value="downloads" ${data.importTo === 'downloads' ? 'selected' : ''}>下载</option>
+                    </select>
+                </div>
+                <div class="ic-sidebar-section">
+                    <div class="ic-sidebar-label">下载后</div>
+                    <label class="ic-toggle-row">
+                        <span class="ic-toggle-text">导入后删除项目</span>
+                        <span class="ic-switch ${data.deleteAfter ? 'on' : ''}" id="ic-deleteAfter"></span>
+                    </label>
+                </div>
+                <div class="ic-sidebar-footer">
+                    <div class="ic-storage-info">
+                        <div class="ic-storage-label">设备存储</div>
+                        <div class="ic-storage-bar"><div class="ic-storage-fill" style="width:42%;"></div></div>
+                        <div class="ic-storage-text">42% 已使用 · 18.4 GB 可用</div>
                     </div>
                 </div>
             </div>
-            <style>
-                @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.05);} }
-                @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0;} }
-            </style>
         `;
-
-        const deviceList = content.querySelector('#ic-deviceList');
-        devices.forEach(d => {
-            const item = document.createElement('div');
-            item.style.cssText = `padding:8px 10px;border-radius:6px;cursor:pointer;margin-bottom:4px;display:flex;align-items:center;gap:8px;font-size:12px;${d.id === selectedDevice.id ? 'background:var(--accent-blue);color:#fff;' : 'color:#ccc;'}`;
-            item.innerHTML = `<span>${d.icon}</span><span style="flex:1;">${d.name}</span>${d.connected ? '<span style="width:6px;height:6px;border-radius:50%;background:#34c759;"></span>' : '<span style="width:6px;height:6px;border-radius:50%;background:#666;"></span>'}`;
-            item.onclick = () => { if (d.connected) { selectedDevice = d; render(); } };
-            deviceList.appendChild(item);
-        });
-
-        const grid = content.querySelector('#ic-grid');
-        capturedImages.forEach(img => {
-            const card = document.createElement('div');
-            card.style.cssText = `aspect-ratio:1;background:#2a2a2a;border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid ${selectedImage === img.id ? 'var(--accent-blue)' : 'transparent'};transition:border-color 0.2s;overflow:hidden;position:relative;`;
-            card.innerHTML = `<div style="font-size:40px;margin-bottom:8px;">${img.thumb}</div><div style="font-size:10px;color:#999;">${img.name}</div><div style="font-size:9px;color:#666;margin-top:2px;">${img.size}</div>`;
-            card.onclick = () => { selectedImage = selectedImage === img.id ? null : img.id; render(); };
-            grid.appendChild(card);
-        });
-
-        content.querySelector('#ic-capture').onclick = () => {
-            if (!isCapturing) {
-                isCapturing = true;
-                render();
-                setTimeout(() => {
-                    isCapturing = false;
-                    const newImg = {
-                        id: Date.now(),
-                        name: `IMG_${String(capturedImages.length + 1).padStart(3, '0')}.jpg`,
-                        date: Date.now(),
-                        size: (1 + Math.random() * 3).toFixed(1) + ' MB',
-                        thumb: ['🏔️','🌅','🌸','🏙️','🌊','🌺','🌲','🏠','🌄','🎆'][Math.floor(Math.random()*10)]
-                    };
-                    capturedImages.unshift(newImg);
+        sidebar.querySelectorAll('[data-dev]').forEach(el => {
+            const dev = devices.find(d => d.id === parseInt(el.dataset.dev, 10));
+            if (dev && dev.connected) {
+                el.addEventListener('click', () => {
+                    data.selectedDeviceId = dev.id;
                     save();
                     render();
-                }, 1500);
+                });
             }
-        };
+        });
+        const importTo = sidebar.querySelector('#ic-importTo');
+        if (importTo) importTo.addEventListener('change', (e) => {
+            data.importTo = e.target.value;
+            save();
+        });
+        const delAfter = sidebar.querySelector('#ic-deleteAfter');
+        if (delAfter) delAfter.addEventListener('click', () => {
+            data.deleteAfter = !data.deleteAfter;
+            save();
+            renderSidebar();
+        });
+    }
 
-        content.querySelector('#ic-importAll').onclick = () => {
-            alert(`已导入 ${capturedImages.length} 张图片到"图片"文件夹`);
-        };
-
-        content.querySelector('#ic-deviceSelect').onchange = (e) => {
-            const d = devices.find(x => x.id === parseInt(e.target.value));
-            if (d && d.connected) { selectedDevice = d; render(); }
-        };
-
-        content.querySelector('#ic-delete').onclick = () => {
-            if (selectedImage) {
-                capturedImages = capturedImages.filter(x => x.id !== selectedImage);
-                selectedImage = null;
+    function renderToolbar() {
+        if (!toolbar) return;
+        const dev = selectedDevice();
+        toolbar.innerHTML = `
+            <div class="ic-toolbar">
+                <div class="ic-toolbar-left">
+                    <span class="ic-tb-dev-name">${escapeHtml(dev.name)}</span>
+                    <span class="ic-tb-dev-status ${dev.connected ? 'on' : 'off'}">${dev.connected ? '已连接' : '未连接'}</span>
+                </div>
+                <div class="ic-toolbar-right">
+                    <button class="ic-tb-btn" id="ic-download" title="下载选定项目" ${!data.selectedImageId ? 'disabled' : ''}>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    <button class="ic-tb-btn" id="ic-importAll" title="全部导入">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7"/><path d="M3 7l3-3h12l3 3"/><circle cx="12" cy="13" r="3"/></svg>
+                    </button>
+                    <button class="ic-tb-btn" id="ic-delete" title="删除选定" ${!data.selectedImageId ? 'disabled' : ''}>
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                </div>
+            </div>
+        `;
+        toolbar.querySelector('#ic-importAll').addEventListener('click', () => {
+            const dest = data.importTo === 'desktop' ? '桌面' : data.importTo === 'downloads' ? '下载' : '图片';
+            showToast(`已导入 ${images.length} 张图片到“${dest}”文件夹`);
+            if (data.deleteAfter) {
+                images = [];
+                data.selectedImageId = null;
                 save();
                 render();
             }
-        };
+        });
+        toolbar.querySelector('#ic-download')?.addEventListener('click', () => {
+            if (!data.selectedImageId) return;
+            const img = images.find(i => i.id === data.selectedImageId);
+            if (img) showToast(`正在下载 ${img.name}...`);
+        });
+        toolbar.querySelector('#ic-delete')?.addEventListener('click', async () => {
+            if (!data.selectedImageId) return;
+            const img = images.find(i => i.id === data.selectedImageId);
+            if (!img) return;
+            const ok = await window.showConfirm(`确定要删除“${img.name}”吗？`, {
+                subtitle: '此操作无法撤销。',
+                confirmText: '删除',
+                danger: true
+            });
+            if (ok) {
+                images = images.filter(i => i.id !== data.selectedImageId);
+                data.selectedImageId = null;
+                save();
+                render();
+                showToast('项目已删除');
+            }
+        });
+    }
+
+    function renderContent() {
+        body.className = 'window-body app-content';
+        body.style.display = 'flex';
+        body.style.flexDirection = 'column';
+        body.innerHTML = `
+            <div class="ic-viewfinder">
+                <div class="ic-vf-bg" id="ic-vf-bg"></div>
+                <div class="ic-vf-overlay">
+                    ${data.isCapturing ? `
+                        <div class="ic-vf-rec">
+                            <span class="ic-rec-dot"></span>
+                            <span>捕获中</span>
+                        </div>
+                    ` : ''}
+                    <div class="ic-vf-grid">
+                        <div class="ic-vf-line"></div><div class="ic-vf-line"></div>
+                        <div class="ic-vf-line v"></div><div class="ic-vf-line v"></div>
+                    </div>
+                    <div class="ic-vf-info">
+                        <div class="ic-vf-info-item">4032 × 3024</div>
+                        <div class="ic-vf-info-item">f/1.8 · 1/120s · ISO 100</div>
+                    </div>
+                    <div class="ic-vf-crosshair">
+                        <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="rgba(255,255,255,0.8)" stroke-width="1" stroke-linecap="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="3"/></svg>
+                    </div>
+                </div>
+                <div class="ic-vf-controls">
+                    <button class="ic-shutter ${data.isCapturing ? 'capturing' : ''}" id="ic-shutter"></button>
+                </div>
+            </div>
+            <div class="ic-bar">
+                <span class="ic-bar-count">${images.length} 个项目</span>
+                <span class="ic-bar-selected">${data.selectedImageId ? '已选择 1 项' : ''}</span>
+            </div>
+            <div class="ic-grid-wrap">
+                <div class="ic-grid" id="ic-grid"></div>
+            </div>
+        `;
+        const bg = body.querySelector('#ic-vf-bg');
+        const dev = selectedDevice();
+        if (dev.connected) {
+            const pal = palettes[Math.floor(Math.random() * palettes.length)];
+            bg.style.background = `radial-gradient(circle at 50% 40%, ${pal[2]}, ${pal[0]} 70%, ${pal[1]})`;
+        } else {
+            bg.style.background = '#2a2a2a';
+        }
+        const grid = body.querySelector('#ic-grid');
+        grid.innerHTML = images.length ? images.map(img => {
+            const pal = palettes[img.palette] || palettes[0];
+            return `
+                <div class="ic-thumb ${data.selectedImageId === img.id ? 'selected' : ''}" data-id="${img.id}">
+                    <div class="ic-thumb-img" style="background:linear-gradient(135deg, ${pal[0]}, ${pal[1]}, ${pal[2]});"></div>
+                    <div class="ic-thumb-meta">
+                        <span class="ic-thumb-name">${escapeHtml(img.name)}</span>
+                        <span class="ic-thumb-size">${escapeHtml(img.size)}</span>
+                    </div>
+                    <div class="ic-thumb-check">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                </div>
+            `;
+        }).join('') : `<div class="ic-grid-empty">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div class="ic-grid-empty-text">没有项目，点击快门捕捉图像</div>
+        </div>`;
+        grid.querySelectorAll('[data-id]').forEach(el => {
+            el.addEventListener('click', () => {
+                const id = parseInt(el.dataset.id, 10);
+                data.selectedImageId = data.selectedImageId === id ? null : id;
+                save();
+                renderContent();
+                renderToolbar();
+            });
+        });
+        body.querySelector('#ic-shutter').addEventListener('click', capture);
+    }
+
+    function capture() {
+        if (data.isCapturing) return;
+        const dev = selectedDevice();
+        if (!dev.connected) {
+            showToast('设备未连接');
+            return;
+        }
+        data.isCapturing = true;
+        renderContent();
+        const flash = document.createElement('div');
+        flash.className = 'ic-flash';
+        body.querySelector('.ic-viewfinder')?.appendChild(flash);
+        setTimeout(() => flash.remove(), 400);
+        captureTimer = setTimeout(() => {
+            data.isCapturing = false;
+            const newImg = {
+                id: Date.now(),
+                name: `IMG_${String(images.length + 1).padStart(4, '0')}.jpg`,
+                date: Date.now(),
+                size: (1 + Math.random() * 3).toFixed(1) + ' MB',
+                palette: Math.floor(Math.random() * palettes.length),
+                w: 4032,
+                h: 3024
+            };
+            images.unshift(newImg);
+            data.selectedImageId = newImg.id;
+            save();
+            render();
+            showToast(`已捕捉 ${newImg.name}`);
+        }, 1200);
+    }
+
+    function render() {
+        renderToolbar();
+        renderSidebar();
+        renderContent();
     }
 
     render();
+
+    return () => {
+        if (captureTimer) clearTimeout(captureTimer);
+    };
 };

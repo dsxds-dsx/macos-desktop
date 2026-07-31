@@ -189,82 +189,251 @@ window.renderAutomator = function(body, sidebar, toolbar, windowId) {
     render();
 };
 
-// Time Machine - 时间机器
+// Time Machine - 时间机器 (macOS Sonoma)
 window.renderTimeMachine = function(body, sidebar, toolbar, windowId) {
-    const backups = [
-        { date: Date.now(), type: 'now', label: '现在' },
-        { date: Date.now() - 3600000 * 2, type: 'hourly', label: '今天 09:30' },
-        { date: Date.now() - 3600000 * 5, type: 'hourly', label: '今天 06:30' },
-        { date: Date.now() - 86400000, type: 'daily', label: '昨天 23:58' },
-        { date: Date.now() - 86400000 * 2, type: 'daily', label: '7月24日 23:55' },
-        { date: Date.now() - 86400000 * 3, type: 'daily', label: '7月23日 23:52' },
-        { date: Date.now() - 86400000 * 7, type: 'weekly', label: '7月19日' },
-        { date: Date.now() - 86400000 * 14, type: 'weekly', label: '7月12日' },
-        { date: Date.now() - 86400000 * 21, type: 'weekly', label: '7月5日' },
-        { date: Date.now() - 86400000 * 30, type: 'monthly', label: '6月26日' },
-    ];
+    const STORAGE_KEY = 'macos_timemachine_v2';
 
-    let selectedBackup = 0;
+    function defaultData() {
+        const now = Date.now();
+        return {
+            backups: [
+                { date: now, type: 'now', label: '现在', size: '当前', files: 1284032 },
+                { date: now - 3600000 * 2, type: 'hourly', label: '今天 09:30', size: '2.3 GB', files: 1283990 },
+                { date: now - 3600000 * 5, type: 'hourly', label: '今天 06:30', size: '1.8 GB', files: 1283950 },
+                { date: now - 86400000, type: 'daily', label: '昨天 23:58', size: '4.1 GB', files: 1283800 },
+                { date: now - 86400000 * 2, type: 'daily', label: '7月27日 23:55', size: '3.7 GB', files: 1283500 },
+                { date: now - 86400000 * 3, type: 'daily', label: '7月26日 23:52', size: '5.2 GB', files: 1283200 },
+                { date: now - 86400000 * 7, type: 'weekly', label: '7月22日', size: '12.4 GB', files: 1280000 },
+                { date: now - 86400000 * 14, type: 'weekly', label: '7月15日', size: '11.8 GB', files: 1275000 },
+                { date: now - 86400000 * 21, type: 'weekly', label: '7月8日', size: '10.9 GB', files: 1270000 },
+                { date: now - 86400000 * 30, type: 'monthly', label: '6月29日', size: '45.2 GB', files: 1250000 }
+            ],
+            selectedIndex: 0,
+            disk: {
+                name: 'MacBook Pro 备份',
+                total: 1024,
+                used: 678,
+                oldest: '2023年8月15日'
+            }
+        };
+    }
+
+    let data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') || defaultData();
+
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    function escapeHtml(s) {
+        if (s == null) return '';
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function showToast(text) {
+        if (window.Toast) window.Toast.show(text);
+        else if (window.toast) window.toast(text);
+    }
+    function typeColor(t) {
+        return { now: '#FF9500', hourly: '#34C759', daily: '#5AC8FA', weekly: '#AF52DE', monthly: '#FF3B30' }[t] || '#8E8E93';
+    }
+    function typeLabel(t) {
+        return { now: '当前', hourly: '每小时', daily: '每日', weekly: '每周', monthly: '每月' }[t] || '';
+    }
+
+    function generateStars() {
+        let stars = '';
+        for (let i = 0; i < 80; i++) {
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            const size = Math.random() * 2 + 0.5;
+            const delay = Math.random() * 4;
+            const dur = Math.random() * 3 + 2;
+            stars += `<div class="tm-star" style="left:${x}%;top:${y}%;width:${size}px;height:${size}px;animation-delay:${delay}s;animation-duration:${dur}s"></div>`;
+        }
+        return stars;
+    }
+
+    function generateFinderIcons() {
+        const items = [
+            { icon: '📁', name: '文稿' },
+            { icon: '📁', name: '下载' },
+            { icon: '📄', name: '报告.pdf' },
+            { icon: '🖼️', name: '照片.jpg' },
+            { icon: '📁', name: '音乐' },
+            { icon: '📊', name: '表格.xlsx' },
+            { icon: '📝', name: '笔记.txt' },
+            { icon: '🎵', name: '歌曲.mp3' },
+            { icon: '📁', name: '桌面' },
+            { icon: '🎬', name: '视频.mov' },
+            { icon: '💎', name: '项目' },
+            { icon: '📦', name: '归档' }
+        ];
+        return items.map(it => `
+            <div class="tm-finder-item">
+                <div class="tm-finder-icon">${it.icon}</div>
+                <div class="tm-finder-name">${escapeHtml(it.name)}</div>
+            </div>
+        `).join('');
+    }
 
     function render() {
+        const backup = data.backups[data.selectedIndex];
+        const usedPct = Math.round(data.disk.used / data.disk.total * 100);
+
         body.innerHTML = `
-            <div class="timemachine-container">
+            <div class="tm-app">
+                <div class="tm-stars">${generateStars()}</div>
+                <div class="tm-nebula"></div>
+
                 <div class="tm-header">
-                    <div class="tm-title">时间机器</div>
-                    <div class="tm-status">
-                        <span class="tm-status-dot" style="background:#34C759"></span>
-                        备份已开启
+                    <div class="tm-header-left">
+                        <div class="tm-back" id="tm-back" ${data.selectedIndex === 0 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                        </div>
+                        <div class="tm-forward" id="tm-forward" ${data.selectedIndex >= data.backups.length - 1 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </div>
+                    </div>
+                    <div class="tm-header-center">
+                        <div class="tm-time-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div class="tm-date-label">${escapeHtml(backup.label)}</div>
+                        <div class="tm-type-badge" style="background:${typeColor(backup.type)}">${typeLabel(backup.type)}</div>
+                    </div>
+                    <div class="tm-header-right">
+                        <div class="tm-status-pill">
+                            <span class="tm-status-dot"></span>
+                            <span>备份已开启</span>
+                        </div>
                     </div>
                 </div>
-                <div class="tm-main">
-                    <div class="tm-visual">
-                        ${backups.slice(0, 8).map((b, i) => `
-                            <div class="tm-window-layer ${i === selectedBackup ? 'active' : ''}" data-idx="${i}"
-                                style="transform: scale(${1 - i * 0.08}) translateY(${i * 15}px); opacity: ${1 - i * 0.1};">
-                                <div class="tm-window">
-                                    <div class="tm-window-header">
-                                        <span class="tm-dots"><span></span><span></span><span></span></span>
-                                        <span>${b.label} - 访达</span>
-                                    </div>
-                                    <div class="tm-window-body">
-                                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:10px;">
-                                            ${['📁 文稿', '📁 下载', '📄 报告.pdf', '🖼️ 照片.jpg', '📁 音乐', '📊 表格.xlsx', '📝 笔记.txt', '🎵 歌曲.mp3'].map(n => `
-                                                <div style="text-align:center;font-size:10px;padding:4px;">
-                                                    <div style="font-size:24px;">${n.split(' ')[0]}</div>
-                                                    <div style="font-size:8px;color:#888;">${n.split(' ')[1]}</div>
+
+                <div class="tm-stage" id="tm-stage">
+                    <div class="tm-tunnel">
+                        ${data.backups.slice(data.selectedIndex, data.selectedIndex + 6).map((b, i) => {
+                            const scale = 1 - i * 0.09;
+                            const ty = i * 20;
+                            const opacity = 1 - i * 0.13;
+                            const blur = i * 0.6;
+                            return `
+                                <div class="tm-window-layer ${i === 0 ? 'active' : ''}" data-idx="${data.selectedIndex + i}"
+                                    style="transform: scale(${scale}) translateY(${ty}px); opacity: ${opacity}; filter: blur(${blur}px)">
+                                    <div class="tm-window">
+                                        <div class="tm-window-titlebar">
+                                            <div class="tm-traffic">
+                                                <span class="tm-tf close"></span>
+                                                <span class="tm-tf min"></span>
+                                                <span class="tm-tf max"></span>
+                                            </div>
+                                            <div class="tm-window-title">${escapeHtml(b.label)} — 访达</div>
+                                            <div class="tm-window-sidebar-toggle">
+                                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                                            </div>
+                                        </div>
+                                        <div class="tm-window-content">
+                                            <div class="tm-finder-toolbar">
+                                                <div class="tm-finder-nav">
+                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+                                                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
                                                 </div>
-                                            `).join('')}
+                                                <div class="tm-finder-path">${i === 0 ? '文稿' : '文稿 (备份)'}</div>
+                                            </div>
+                                            <div class="tm-finder-grid">
+                                                ${generateFinderIcons()}
+                                            </div>
+                                            <div class="tm-finder-status">${b.files.toLocaleString()} 个项目 · ${escapeHtml(b.size)}</div>
                                         </div>
                                     </div>
                                 </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div class="tm-footer">
+                    <div class="tm-disk-info">
+                        <div class="tm-disk-icon">
+                            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+                        </div>
+                        <div class="tm-disk-body">
+                            <div class="tm-disk-name">${escapeHtml(data.disk.name)}</div>
+                            <div class="tm-disk-bar">
+                                <div class="tm-disk-fill" style="width:${usedPct}%"></div>
                             </div>
-                        `).join('')}
-                    </div>
-                    <div class="tm-controls">
-                        <div class="tm-backup-list">
-                            <div class="tm-list-title">备份时间线</div>
-                            ${backups.map((b, i) => `
-                                <div class="tm-backup-item ${i === selectedBackup ? 'active' : ''}" data-idx="${i}">
-                                    <span class="tm-backup-dot" style="background:${b.type === 'now' ? '#FF9500' : b.type === 'hourly' ? '#34C759' : b.type === 'daily' ? '#5AC8FA' : '#AF52DE'}"></span>
-                                    <span class="tm-backup-label">${b.label}</span>
-                                    <span class="tm-backup-type">${b.type === 'now' ? '当前' : b.type === 'hourly' ? '每小时' : b.type === 'daily' ? '每日' : '每周'}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="tm-actions">
-                            <button class="tm-btn tm-btn-restore">恢复</button>
-                            <button class="tm-btn tm-btn-secondary">手动备份</button>
+                            <div class="tm-disk-meta">${data.disk.used} GB 已用 / ${data.disk.total} GB · 最早备份 ${escapeHtml(data.disk.oldest)}</div>
                         </div>
                     </div>
+                    <div class="tm-actions">
+                        <button class="tm-btn-secondary" id="tm-backup-now">
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><polyline points="21 3 21 8 16 8"/></svg>
+                            <span>立即备份</span>
+                        </button>
+                        <button class="tm-btn-restore" id="tm-restore" ${data.selectedIndex === 0 ? 'disabled' : ''}>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                            <span>恢复</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tm-timeline-rail" id="tm-timeline">
+                    ${data.backups.map((b, i) => `
+                        <div class="tm-tl-tick ${i === data.selectedIndex ? 'active' : ''} ${i > data.selectedIndex ? 'future' : ''}" data-idx="${i}">
+                            <div class="tm-tl-dot" style="background:${typeColor(b.type)}"></div>
+                            <div class="tm-tl-label">${escapeHtml(b.label)}</div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         `;
+        bind();
+    }
 
-        body.querySelectorAll('.tm-backup-item').forEach(item => {
-            item.addEventListener('click', () => {
-                selectedBackup = parseInt(item.dataset.idx);
+    function bind() {
+        const back = body.querySelector('#tm-back');
+        if (back) back.addEventListener('click', () => {
+            if (data.selectedIndex > 0) { data.selectedIndex--; save(); render(); }
+        });
+        const fwd = body.querySelector('#tm-forward');
+        if (fwd) fwd.addEventListener('click', () => {
+            if (data.selectedIndex < data.backups.length - 1) { data.selectedIndex++; save(); render(); }
+        });
+        const restore = body.querySelector('#tm-restore');
+        if (restore) restore.addEventListener('click', () => {
+            if (data.selectedIndex === 0) return;
+            const b = data.backups[data.selectedIndex];
+            showToast(`正在从「${b.label}」恢复文件...`);
+        });
+        const backupNow = body.querySelector('#tm-backup-now');
+        if (backupNow) backupNow.addEventListener('click', () => {
+            showToast('正在创建新备份...');
+            setTimeout(() => {
+                const newBackup = { date: Date.now(), type: 'now', label: '现在', size: '当前', files: data.backups[0].files + 10 };
+                data.backups.forEach(b => {
+                    if (b.type === 'now') { b.type = 'hourly'; b.label = '今天 ' + new Date().getHours() + ':' + String(new Date().getMinutes()).padStart(2, '0'); b.size = '0.5 GB'; }
+                });
+                data.backups.unshift(newBackup);
+                data.selectedIndex = 0;
+                save();
+                render();
+                showToast('备份完成');
+            }, 1500);
+        });
+        body.querySelectorAll('.tm-tl-tick').forEach(tick => {
+            tick.addEventListener('click', () => {
+                data.selectedIndex = parseInt(tick.dataset.idx);
+                save();
                 render();
             });
+        });
+        body.querySelectorAll('.tm-window-layer').forEach(layer => {
+            layer.addEventListener('click', () => {
+                const idx = parseInt(layer.dataset.idx);
+                if (idx > data.selectedIndex) { data.selectedIndex = idx; save(); render(); }
+            });
+        });
+
+        // Keyboard navigation
+        body.tabIndex = 0;
+        body.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); if (data.selectedIndex > 0) { data.selectedIndex--; save(); render(); } }
+            else if (e.key === 'ArrowRight') { e.preventDefault(); if (data.selectedIndex < data.backups.length - 1) { data.selectedIndex++; save(); render(); } }
         });
     }
 

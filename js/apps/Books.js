@@ -214,7 +214,7 @@ window.renderBooks = function(body, sidebar, toolbar, windowId) {
                     <div class="books-content-inner">
                         <h1 class="books-page-title">${title}</h1>
                         <div class="books-bookstore-hero">
-                            <div class="books-bookstore-icon">🏪</div>
+                            <div class="books-bookstore-icon"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l1-5h16l1 5M4 9v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9M9 21V12h6v9"/></svg></div>
                             <div class="books-bookstore-info">
                                 <div class="books-bookstore-text">书库中已有 ${books.length} 本经典名著</div>
                                 <div class="books-bookstore-hint">所有书籍均为公有领域作品，可免费阅读</div>
@@ -228,7 +228,9 @@ window.renderBooks = function(body, sidebar, toolbar, windowId) {
 
         if (displayBooks.length === 0) {
             const emptyText = searchQuery.trim() ? '未找到相关书籍' : (state.currentSection === 'reading' ? '还没有正在阅读的书' : '暂无书籍');
-            const emptyIcon = searchQuery.trim() ? '🔍' : '📖';
+            const emptyIcon = searchQuery.trim()
+                ? '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>'
+                : '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>';
             body.innerHTML = `
                 <div class="books-content">
                     <div class="books-empty">

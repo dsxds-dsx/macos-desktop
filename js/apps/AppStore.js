@@ -162,7 +162,8 @@ window.renderAppStore = function(body, sidebar, toolbar, windowId) {
     function renderBrowse() {
         const list = getFilteredApps();
         if (list.length === 0) {
-            body.innerHTML = `<div class="appstore-content"><div class="appstore-empty"><div class="appstore-empty-icon">📦</div><div class="appstore-empty-text">该分类暂无应用</div></div></div>`;
+            const emptyIcon = '<svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg>';
+            body.innerHTML = `<div class="appstore-content"><div class="appstore-empty"><div class="appstore-empty-icon">${emptyIcon}</div><div class="appstore-empty-text">该分类暂无应用</div></div></div>`;
             return;
         }
         const featured = list.find(a => a.featured) || list[0];
@@ -316,7 +317,7 @@ window.renderAppStore = function(body, sidebar, toolbar, windowId) {
                 <div class="appstore-content-scroll">
                     <h2 class="appstore-section-title">搜索"${escapeHtml(searchQuery)}"</h2>
                     ${results.length === 0 ? `
-                        <div class="appstore-empty"><div class="appstore-empty-icon">🔍</div><div class="appstore-empty-text">未找到相关应用</div></div>
+                        <div class="appstore-empty"><div class="appstore-empty-icon"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></div><div class="appstore-empty-text">未找到相关应用</div></div>
                     ` : `
                         <div class="appstore-list">
                             ${results.map(app => renderAppRow(app)).join('')}
@@ -335,7 +336,7 @@ window.renderAppStore = function(body, sidebar, toolbar, windowId) {
                 <div class="appstore-content-scroll">
                     <h2 class="appstore-section-title">可用更新</h2>
                     ${installedApps.length === 0 ? `
-                        <div class="appstore-empty"><div class="appstore-empty-icon">✓</div><div class="appstore-empty-text">所有应用均为最新版本</div></div>
+                        <div class="appstore-empty"><div class="appstore-empty-icon"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></div><div class="appstore-empty-text">所有应用均为最新版本</div></div>
                     ` : `
                         <div class="appstore-list">
                             ${installedApps.map(app => `
@@ -376,7 +377,7 @@ window.renderAppStore = function(body, sidebar, toolbar, windowId) {
                 <div class="appstore-content-scroll">
                     <h2 class="appstore-section-title">我的已购项目</h2>
                     ${purchased.length === 0 ? `
-                        <div class="appstore-empty"><div class="appstore-empty-icon">📦</div><div class="appstore-empty-text">还没有已购项目</div></div>
+                        <div class="appstore-empty"><div class="appstore-empty-icon"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96L12 12.01l8.73-5.05M12 22.08V12"/></svg></div><div class="appstore-empty-text">还没有已购项目</div></div>
                     ` : `
                         <div class="appstore-list">
                             ${purchased.map(app => renderAppRow(app)).join('')}

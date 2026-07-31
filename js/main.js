@@ -30,10 +30,139 @@ function initSystem() {
         setupRubberBandSelection();
         setupScreensaver();
         setupBoot();
-        
+        setupToast();
+
     } catch (e) {
         console.error('System initialization error:', e);
     }
+}
+
+function setupToast() {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+    window.toast = function(message, type = 'info', duration = 2600) {
+        if (!container) return;
+        const t = document.createElement('div');
+        t.className = `toast toast-${type}`;
+        const icons = {
+            success: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>`,
+            error: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>`,
+            info: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`,
+            warning: `<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>`
+        };
+        t.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span><span class="toast-msg"></span>`;
+        t.querySelector('.toast-msg').textContent = message;
+        container.appendChild(t);
+        requestAnimationFrame(() => t.classList.add('show'));
+        setTimeout(() => {
+            t.classList.remove('show');
+            setTimeout(() => t.remove(), 300);
+        }, duration);
+    };
+    window.showToast = window.toast;
+
+    // ============ macOS-style Dialog System ============
+    const WARN_ICON = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>`;
+    const DANGER_ICON = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>`;
+    const INFO_ICON = `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>`;
+
+    function buildDialog({ icon, iconType, message, subtitle, input, placeholder, inputValue, confirmText, cancelText, danger }) {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'mac-dialog-overlay';
+            const dialog = document.createElement('div');
+            dialog.className = 'mac-dialog';
+            dialog.innerHTML = `
+                ${icon ? `<div class="mac-dialog-icon-wrap"><div class="mac-dialog-icon ${iconType || 'warning'}">${icon}</div></div>` : ''}
+                <div class="mac-dialog-message"></div>
+                ${subtitle ? `<div class="mac-dialog-subtitle"></div>` : ''}
+                ${input ? `<input type="text" class="mac-dialog-input" />` : ''}
+                <div class="mac-dialog-buttons">
+                    <button class="mac-dialog-btn secondary cancel-btn">${cancelText || '取消'}</button>
+                    <button class="mac-dialog-btn ${danger ? 'danger' : 'primary'} ok-btn">${confirmText || '好'}</button>
+                </div>
+            `;
+            dialog.querySelector('.mac-dialog-message').textContent = message || '';
+            if (subtitle) dialog.querySelector('.mac-dialog-subtitle').textContent = subtitle;
+            const inputEl = dialog.querySelector('.mac-dialog-input');
+            if (input && inputEl) {
+                if (placeholder) inputEl.placeholder = placeholder;
+                if (inputValue != null) inputEl.value = inputValue;
+            }
+            overlay.appendChild(dialog);
+            document.body.appendChild(overlay);
+            requestAnimationFrame(() => overlay.classList.add('show'));
+
+            const close = (result) => {
+                overlay.classList.remove('show');
+                setTimeout(() => overlay.remove(), 200);
+                resolve(result);
+            };
+            dialog.querySelector('.cancel-btn').addEventListener('click', () => close(input ? null : false));
+            dialog.querySelector('.ok-btn').addEventListener('click', () => close(input ? (inputEl ? inputEl.value : '') : true));
+            if (input && inputEl) {
+                inputEl.focus();
+                if (inputValue != null) inputEl.select();
+                inputEl.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') close(inputEl.value);
+                    if (e.key === 'Escape') close(null);
+                });
+            } else {
+                dialog.querySelector('.ok-btn').focus();
+            }
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) close(input ? null : false);
+            });
+            document.addEventListener('keydown', function esc(e) {
+                if (e.key === 'Escape') {
+                    document.removeEventListener('keydown', esc);
+                    close(input ? null : false);
+                }
+            });
+        });
+    }
+
+    window.showConfirm = function(message, options = {}) {
+        return buildDialog({
+            icon: options.danger ? DANGER_ICON : WARN_ICON,
+            iconType: options.danger ? 'danger' : 'warning',
+            message,
+            subtitle: options.subtitle || '',
+            confirmText: options.confirmText || '确定',
+            cancelText: options.cancelText || '取消',
+            danger: options.danger || false
+        });
+    };
+
+    window.showAlert = function(message, options = {}) {
+        return buildDialog({
+            icon: INFO_ICON,
+            iconType: 'info',
+            message,
+            subtitle: options.subtitle || '',
+            confirmText: options.confirmText || '好',
+            cancelText: options.cancelText || ''
+        });
+    };
+
+    window.showPrompt = function(message, options = {}) {
+        return buildDialog({
+            icon: INFO_ICON,
+            iconType: 'info',
+            message,
+            subtitle: options.subtitle || '',
+            input: true,
+            placeholder: options.placeholder || '',
+            inputValue: options.value || '',
+            confirmText: options.confirmText || '好',
+            cancelText: options.cancelText || '取消'
+        });
+    };
 }
 
 function setupBoot() {
@@ -270,7 +399,7 @@ function handleAppleMenuAction(action) {
             showScreensaver();
             break;
         case 'restart':
-            if (confirm('确定要重新启动吗？')) location.reload();
+            showConfirm('确定要重新启动吗？', { confirmText: '重新启动' }).then(ok => { if (ok) location.reload(); });
             break;
         case 'shutdown':
             shutdown();
