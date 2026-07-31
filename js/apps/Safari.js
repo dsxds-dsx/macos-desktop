@@ -1,7 +1,6 @@
 window.renderSafari = function(body, sidebar, toolbar, windowId) {
-    let history = [''];
-    let historyIndex = 0;
-    let currentUrl = '';
+    let tabs = [];
+    let activeTabId = null;
     let useProxy = true;
     let checkTimers = [];
 
@@ -27,6 +26,57 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
         { name: '洛谷', url: 'https://www.luogu.com', color: '#4CAF50', icon: '洛' }
     ];
 
+    const TABS_STORAGE_KEY = 'macos_safari_tabs';
+
+    function activeTab() {
+        return tabs.find(t => t.id === activeTabId);
+    }
+
+    function createTab(url, title) {
+        url = url || '';
+        title = title || '';
+        return {
+            id: Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8),
+            url: url,
+            title: title,
+            history: [url || ''],
+            historyIndex: 0
+        };
+    }
+
+    function loadTabs() {
+        try {
+            const saved = localStorage.getItem(TABS_STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                const savedTabs = Array.isArray(parsed) ? parsed : parsed.tabs;
+                const savedActiveId = Array.isArray(parsed) ? null : parsed.activeTabId;
+                if (Array.isArray(savedTabs) && savedTabs.length > 0) {
+                    tabs = savedTabs.map(t => ({
+                        id: (t && t.id) ? t.id : (Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8)),
+                        url: (t && typeof t.url === 'string') ? t.url : '',
+                        title: (t && typeof t.title === 'string') ? t.title : '',
+                        history: (t && Array.isArray(t.history) && t.history.length > 0) ? t.history : [''],
+                        historyIndex: (t && typeof t.historyIndex === 'number') ? t.historyIndex : 0
+                    }));
+                    activeTabId = tabs.find(t => t.id === savedActiveId) ? savedActiveId : tabs[0].id;
+                    return;
+                }
+            }
+        } catch (e) {}
+        const t = createTab();
+        tabs = [t];
+        activeTabId = t.id;
+    }
+
+    function saveTabs() {
+        try {
+            localStorage.setItem(TABS_STORAGE_KEY, JSON.stringify({ tabs: tabs, activeTabId: activeTabId }));
+        } catch (e) {}
+    }
+
+    loadTabs();
+
     function clearAllTimers() {
         checkTimers.forEach(t => clearTimeout(t));
         checkTimers = [];
@@ -46,14 +96,66 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
         return url.startsWith('https://');
     }
 
+    function switchTab(tabId) {
+        if (tabId === activeTabId) return;
+        activeTabId = tabId;
+        clearAllTimers();
+        autoProxyAttempts = 0;
+        saveTabs();
+        render();
+    }
+
+    function newTab(url, title) {
+        const t = createTab(url, title);
+        tabs.push(t);
+        activeTabId = t.id;
+        clearAllTimers();
+        autoProxyAttempts = 0;
+        saveTabs();
+        render();
+    }
+
+    function closeTab(tabId) {
+        const idx = tabs.findIndex(t => t.id === tabId);
+        if (idx === -1) return;
+        tabs.splice(idx, 1);
+        if (tabs.length === 0) {
+            const t = createTab();
+            tabs.push(t);
+            activeTabId = t.id;
+        } else {
+            const newIdx = Math.min(idx, tabs.length - 1);
+            activeTabId = tabs[newIdx].id;
+        }
+        clearAllTimers();
+        autoProxyAttempts = 0;
+        saveTabs();
+        render();
+    }
+
     function renderToolbar() {
         if (!toolbar) return;
+        const tab = activeTab();
+        const history = tab ? tab.history : [''];
+        const historyIndex = tab ? tab.historyIndex : 0;
+        const currentUrl = tab ? tab.url : '';
         const canBack = historyIndex > 0;
         const canFwd = historyIndex < history.length - 1;
         const sec = currentUrl && isSecure(currentUrl);
         const proxyName = PROXY_SERVICES[currentProxyIndex]?.name || '';
 
         toolbar.innerHTML = `
+            <div class="safari-tabbar">
+                <div class="safari-tabs">
+                    ${tabs.map(t => `
+                        <div class="safari-tab ${t.id === activeTabId ? 'active' : ''}" data-tab-id="${t.id}">
+                            <span class="safari-tab-title">${t.title || '起始页'}</span>
+                            <button class="safari-tab-close" data-tab-id="${t.id}">×</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button class="safari-tab-new" id="safari-newtab" title="新建标签">+</button>
+            </div>
             <div class="safari-toolbar">
                 <div class="safari-toolbar-group">
                     <button class="safari-icon-btn" id="safari-back" ${canBack ? '' : 'disabled'} title="后退" aria-label="后退">
@@ -128,24 +230,52 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
             if (lock) lock.style.opacity = '';
         });
 
+        toolbar.querySelectorAll('.safari-tab').forEach(tabEl => {
+            tabEl.addEventListener('click', (e) => {
+                if (e.target.classList.contains('safari-tab-close')) return;
+                switchTab(tabEl.dataset.tabId);
+            });
+        });
+
+        toolbar.querySelectorAll('.safari-tab-close').forEach(closeBtn => {
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeTab(closeBtn.dataset.tabId);
+            });
+        });
+
+        const newTabBtn = toolbar.querySelector('#safari-newtab');
+        if (newTabBtn) {
+            newTabBtn.addEventListener('click', () => {
+                newTab();
+            });
+        }
+
         toolbar.querySelector('#safari-back').addEventListener('click', () => {
-            if (historyIndex > 0) {
-                historyIndex--;
-                currentUrl = history[historyIndex];
+            const t = activeTab();
+            if (t && t.historyIndex > 0) {
+                t.historyIndex--;
+                t.url = t.history[t.historyIndex];
+                t.title = t.url ? displayUrl(t.url) : '';
+                saveTabs();
                 render();
             }
         });
 
         toolbar.querySelector('#safari-forward').addEventListener('click', () => {
-            if (historyIndex < history.length - 1) {
-                historyIndex++;
-                currentUrl = history[historyIndex];
+            const t = activeTab();
+            if (t && t.historyIndex < t.history.length - 1) {
+                t.historyIndex++;
+                t.url = t.history[t.historyIndex];
+                t.title = t.url ? displayUrl(t.url) : '';
+                saveTabs();
                 render();
             }
         });
 
         toolbar.querySelector('#safari-reload').addEventListener('click', () => {
-            if (currentUrl) render();
+            const t = activeTab();
+            if (t && t.url) render();
         });
 
         toolbar.querySelector('#safari-home').addEventListener('click', () => {
@@ -155,7 +285,8 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
         toolbar.querySelector('#safari-proxy').addEventListener('click', () => {
             useProxy = !useProxy;
             currentProxyIndex = 0;
-            if (currentUrl) {
+            const t = activeTab();
+            if (t && t.url) {
                 render();
             }
         });
@@ -163,7 +294,8 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
         const extBtn = toolbar.querySelector('#safari-external');
         if (extBtn) {
             extBtn.addEventListener('click', () => {
-                if (currentUrl) window.open(currentUrl, '_blank');
+                const t = activeTab();
+                if (t && t.url) window.open(t.url, '_blank');
             });
         }
     }
@@ -171,10 +303,14 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
     function navigateTo(url) {
         clearAllTimers();
         autoProxyAttempts = 0;
+        const t = activeTab();
+        if (!t) return;
         if (!url) {
-            currentUrl = '';
-            history = [''];
-            historyIndex = 0;
+            t.url = '';
+            t.history = [''];
+            t.historyIndex = 0;
+            t.title = '';
+            saveTabs();
             render();
             return;
         }
@@ -188,10 +324,12 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
             }
         }
 
-        currentUrl = targetUrl;
-        history = history.slice(0, historyIndex + 1);
-        history.push(targetUrl);
-        historyIndex = history.length - 1;
+        t.url = targetUrl;
+        t.title = displayUrl(targetUrl);
+        t.history = t.history.slice(0, t.historyIndex + 1);
+        t.history.push(targetUrl);
+        t.historyIndex = t.history.length - 1;
+        saveTabs();
         render();
     }
 
@@ -266,6 +404,8 @@ window.renderSafari = function(body, sidebar, toolbar, windowId) {
 
     function renderContent() {
         clearAllTimers();
+        const t = activeTab();
+        const currentUrl = t ? t.url : '';
         if (!currentUrl) {
             body.innerHTML = `
                 <div class="safari-content safari-home">

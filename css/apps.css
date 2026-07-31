@@ -71,6 +71,119 @@
     user-select: text;
 }
 
+.safari-tabbar {
+    display: flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 4px 0 6px;
+    background: var(--window-header);
+    border-bottom: 0.5px solid var(--border-color);
+    gap: 1px;
+    -webkit-font-smoothing: antialiased;
+    flex-shrink: 0;
+}
+
+.safari-tabs {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: 100%;
+    scrollbar-width: none;
+}
+.safari-tabs::-webkit-scrollbar { display: none; }
+
+.safari-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 24px;
+    min-width: 120px;
+    max-width: 220px;
+    padding: 0 6px 0 10px;
+    margin: 0 1px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: var(--cursor-pointer);
+    white-space: nowrap;
+    overflow: hidden;
+    transition: background 0.12s ease, color 0.12s ease;
+    flex-shrink: 0;
+}
+
+.safari-tab:hover {
+    background: rgba(255,255,255,0.08);
+}
+[data-theme="light"] .safari-tab:hover {
+    background: rgba(0,0,0,0.06);
+}
+
+.safari-tab.active {
+    background: var(--window-bg);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 0.5px var(--glass-border);
+}
+
+.safari-tab-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.safari-tab-close {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    color: var(--text-tertiary);
+    cursor: var(--cursor-pointer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.1s, background 0.1s;
+    flex-shrink: 0;
+}
+
+.safari-tab:hover .safari-tab-close,
+.safari-tab.active .safari-tab-close {
+    opacity: 1;
+}
+
+.safari-tab-close:hover {
+    background: rgba(0,0,0,0.15);
+    color: var(--text-primary);
+}
+
+.safari-tab-new {
+    width: 26px;
+    height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: var(--cursor-pointer);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: background 0.12s;
+}
+
+.safari-tab-new:hover {
+    background: rgba(255,255,255,0.1);
+    color: var(--text-primary);
+}
+[data-theme="light"] .safari-tab-new:hover {
+    background: rgba(0,0,0,0.07);
+}
+
 .safari-toolbar {
     display: flex;
     align-items: center;
